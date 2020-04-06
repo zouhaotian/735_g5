@@ -1,12 +1,12 @@
-setwd("/Users/jianchen/Documents/GitHub/735_g5/Bayesian method")
+#setwd("/Users/jianchen/Documents/GitHub/735_g5/Bayesian method")
 library(rstan)
 library(JM)
+library(nlme)
 library(tidyverse)
 #options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
-md <- stan_model('Bayesian.stan')
-
+## Prepare data
 aids$drug = ifelse(aids$drug == "ddC", 1, 0)
 aids$gender = ifelse(aids$gender == "male", 1, 0)
 aids$prevOI = ifelse(aids$prevOI == "AIDS", 1, 0)
@@ -14,7 +14,6 @@ aids$AZT = ifelse(aids$AZT == "intolerance", 1, 0)
 
 aids_short <- aids[1:9] %>%
   spread(key = obstime, value = CD4)
-
 
 set.seed(1)
 n <- length(unique(aids$patient))
@@ -29,11 +28,16 @@ w <- aids_short$drug
 x <- as.matrix(aids[,6:9])
 Y <- aids$CD4
 
+## Compile model
+md <- stan_model('Bayesian.stan')
+
 ## Specify stan data, parameters, and initial values for parameters
+pars <- c('beta', 'boldbeta', 'logh0', 'gamma', 'alpha', 'sigma_u', 'sigma_e')
 stanDat <- list(n = n, nobs = nobs, ID = ID, ncov = ncov, J = J, time = time,
                 w = w, surv_time = surv_time, status = status, x = x, Y = Y)
 
 ## sampling from stan
-fitStan <- sampling(md, data = stanDat)
+fitStan <- sampling(md, data = stanDat, pars = pars, chains = 4, iter = 20000, seed = 1)
 fitStan
-
+#results = as.data.frame(summary(fitStan)$summary)
+#save(results, file = "results.RData")

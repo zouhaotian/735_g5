@@ -1,15 +1,15 @@
 data{
-  int<lower=0> n;
-  int<lower=0> nobs;
-  int<lower=0> ncov;
-  int<lower=0> ID[nobs];
-  int<lower=0> J[n+1];
-  real<lower=0> time[nobs];
-  real surv_time[n];
-  real status[n];
-  real w[n];
-  matrix[nobs, ncov] x;
-  real Y[nobs];
+  int<lower=0> n;            // number of  subjects
+  int<lower=0> nobs;         // numebr of observations
+  int<lower=0> ncov;         // number of covariates
+  int<lower=0> ID[nobs];     // patient ID
+  int<lower=0> J[n+1];       // J is for indicating where each subject is in long data
+  real<lower=0> time[nobs];  //obstime
+  real surv_time[n];         // event time
+  real status[n];            // censoring indicator
+  real w[n];                 //covariate in h is drug
+  matrix[nobs, ncov] x;      // covariates include drug, gender, prevOI and AZT
+  real Y[nobs];              // outcome CD4
 }
 
 parameters{
@@ -25,8 +25,8 @@ parameters{
 }
 
 transformed parameters{
-  vector[nobs] m;
-  vector[nobs] mT;
+  vector[nobs] m;  // m_i(t_ij)
+  vector[nobs] mT; // m_i(T_i)
   real h[n];
   real S[n];
   real LL[n];
@@ -41,8 +41,9 @@ transformed parameters{
   for (i in 1:n){
     h[i] = exp(logh0 + w[i]*gamma + alpha*mT[ID[i]]);
     S[i] = exp(-h[i]*(1-exp(-alpha*beta[2]*surv_time[i]))/(alpha*beta[2]));
-    LL[i] = log(pow(h[i], status[i])*S[i]) + normal_lpdf(u[i] | 0, sigma_u);
     
+    // calculate the component of log-likelihood of subject i
+    LL[i] = log(pow(h[i], status[i])*S[i]) + normal_lpdf(u[i] | 0, sigma_u);
     for(j in J[i]:(J[i+1]-1)){
       LL[i] = LL[i] + normal_lpdf(Y[j] | m[j], sigma_e);
     }
