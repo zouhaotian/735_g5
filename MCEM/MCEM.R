@@ -2,6 +2,13 @@ library(data.table)
 library(JM)
 data(aids)
 
+# xi: drug, gender, prevOI, AZT
+# wi: drug
+# ti: obstime
+# Ti: Time
+# yi: CD4
+# deltai: death
+
 # latent mean
 m = function(ti, xi, ui, beta0, beta1, beta){
   # beta0: intercept
@@ -20,7 +27,6 @@ logh = function(wi, ti, xi, ui, h0, beta0, beta1, beta, gamma, alpha) {
 
 # log survival function
 logS = function(wi, Ti, xi, ui, h0, beta0, beta1, beta, gamma, alpha) {
-  # xi: covariates of subject i at Ti
   return(-h0 * exp(wi * gamma + alpha * (beta0 + xi[1, ] %*% beta + ui)) * (exp(alpha * beta1 * Ti) - 1) / (alpha * beta1))
 }
 
@@ -35,7 +41,8 @@ lli = function(ui, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, al
 
 # MH ratio
 R = function(u, ut, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u){
-  # u is the proposal, ut is the current state
+  # u: proposal
+  # ut: current state
   logR = lli(u, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u) - 
     lli(ut, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u)
   
@@ -67,6 +74,7 @@ mcmc.sampler.i = function(yi, wi, Ti, xi, ti, deltai, h0, beta0, beat1, beta, ga
   return(u.rw.chain[-(1:burn_in)])
 }
 
+# data augmentation
 augment = function(data, M = 10000){
   if(!is.data.table(data)) data = data.table(data)
   data_aug = data[rep(1:nrow(data),  M),]
@@ -114,6 +122,9 @@ aids$drug = as.numeric(aids$drug) - 1
 aids$gender = as.numeric(aids$gender) - 1
 aids$prevOI = as.numeric(aids$prevOI) - 1
 aids$AZT = as.numeric(aids$AZT) - 1
+aids_aug = augment(aids, M = 1000)
+
+library(optimx)
 
 
 
