@@ -85,27 +85,5 @@ mcmc.sampler.all = function(data, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u
   return(data_aug)
 }
 
-aids$drug = as.numeric(aids$drug) - 1
-aids$gender = as.numeric(aids$gender) - 1
-aids$prevOI = as.numeric(aids$prevOI) - 1
-aids$AZT = as.numeric(aids$AZT) - 1
-aids_aug = augment(aids, M = 1000)
-h0 = exp(-2)
-beta0 = 20
-alpha = 0.2
-beta1 = -1
-beta = rep(0.1, 4)
-gamma = -1
-s2e = 1
-s2u = 1
-yi = aids[patient == 1, CD4]
-xi = as.matrix(aids[patient == 1, .(drug, gender, prevOI, AZT)])
-ti = aids[patient == 1, obstime]
-deltai = aids[patient == 1, death][1]
-Ti = aids[patient == 1, Time][1]
-wi = aids[patient == 1, drug][1]
-ui = 0.5
-u = 0.9
 
-chain = mcmc.sampler.i(yi, wi, Ti, xi, ti, deltai, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1)
 
