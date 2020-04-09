@@ -1,4 +1,6 @@
 library(data.table)
+library(JM)
+data(aids)
 
 # latent mean
 m = function(ti, xi, ui, beta0, beta1, beta){
@@ -90,4 +92,28 @@ mcmc.sampler.all = function(data, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u
   }
   return(data_aug)
 }
+
+qfunction = function(data, data_aug, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u) {
+  # data: aids
+  # datat_aug: augmented aids data with samples
+  n = length(unique(data$patient))
+  q = rep(0, n)
+  for (i in 1:n) {
+    yi = data_aug[patient == i, CD4]
+    xi = as.matrix(data_aug[patient == i, .(drug, gender, prevOI, AZT)])
+    ti = data_aug[patient == i, obstime]
+    deltai = data[patient == i, death][1]
+    Ti = data[patient == i, Time][1]
+    wi = data[patient == i, drug][1]
+    ui = data_aug[patient == i, samples]
+    q[i] = mean(lli(ui, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u))
+  }
+  return(sum(q))
+}
+aids$drug = as.numeric(aids$drug) - 1
+aids$gender = as.numeric(aids$gender) - 1
+aids$prevOI = as.numeric(aids$prevOI) - 1
+aids$AZT = as.numeric(aids$AZT) - 1
+
+
 
