@@ -15,7 +15,7 @@ m = function(ti, xi, ui, beta0, beta1, beta){
   # beta0: intercept
   # beta1: coefficient of t_i
   # beta: coeffieicent of x_i
-  return(beta0 + ti * beta1 + xi %*% beta)+ ui)
+  return(beta0 + ti * beta1 + xi %*% beta+ ui)
 }
 
 # log hazard function
