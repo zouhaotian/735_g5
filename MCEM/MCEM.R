@@ -41,9 +41,10 @@ R = function(u, ut, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, a
 }
 
 # mcmc sampler for ui
-mcmc.sampler.i = function(yi, wi, Ti, xi, ti, deltai, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1){
+mcmc.sampler.i = function(yi, wi, Ti, xi, ti, deltai, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1, trace = 0){
   # sigma is the standard deviation of normal distribution proposal
   u.rw.chain = rep(0, M)
+  accept = 0
   for (i in 1:(M-1)) {
     ut = u.rw.chain[i]
     u = ut + rnorm(1, sd = sigma)
@@ -52,9 +53,14 @@ mcmc.sampler.i = function(yi, wi, Ti, xi, ti, deltai, h0, beta0, beat1, beta, ga
     keep = rbinom(1, 1, r)
     if (keep == 1){
       u.rw.chain[i + 1] = u
+      accept = accept + 1
     }else{
       u.rw.chain[i + 1] = ut
     }
+  }
+  
+  if (trace != 0) {
+    cat(sprintf("Acceptance rate: %.3f", accept / M))
   }
   return(u.rw.chain[-(1:burn_in)])
 }
@@ -84,6 +90,4 @@ mcmc.sampler.all = function(data, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u
   }
   return(data_aug)
 }
-
-
 
