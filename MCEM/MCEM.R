@@ -1,6 +1,7 @@
 library(data.table)
 library(JM)
 data(aids)
+aids = data.table(aids)
 
 # xi: drug, gender, prevOI, AZT
 # wi: drug
@@ -84,9 +85,8 @@ augment = function(data, M = 10000){
   return(data_aug)
 }
 
-mcmc.sampler.all = function(data, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1) {
+mcmc.sampler.all = function(data, data_aug, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1) {
   n = length(unique(data$patient))
-  data_aug = augment(data, M)
   for (i in 1:n) {
     yi = data[patient == i, CD4]
     xi = as.matrix(data[patient == i, .(drug, gender, prevOI, AZT)])
@@ -116,15 +116,13 @@ qfunction = function(data, data_aug, h0, beta0, beat1, beta, gamma, alpha, s2e, 
     ui = data_aug[patient == i, samples]
     q[i] = mean(lli(ui, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u))
   }
-  return(sum(q))
+  return(mean(q))
 }
+
 aids$drug = as.numeric(aids$drug) - 1
 aids$gender = as.numeric(aids$gender) - 1
 aids$prevOI = as.numeric(aids$prevOI) - 1
 aids$AZT = as.numeric(aids$AZT) - 1
 aids_aug = augment(aids, M = 1000)
-
-library(optimx)
-
 
 
