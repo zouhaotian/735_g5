@@ -130,7 +130,7 @@ m_surv = X_aug_surv %*% c(beta0, beta1, beta) + aids_M_aug[, samples]
 log_h =  log(h0) + aids_M_aug$drug * gamma + alpha * m_surv
 log_s = -exp(log_h) * (exp(alpha * beta1 * aids_M_aug$Time) - 1) / (alpha * beta1)
 qfunction = sum(dnorm(aids_M_aug$CD4, mean = m, sd = sqrt(s2e), log = TRUE))/10000 + 
-  sum(aids_M_aug$death * logh)/30000 + sum(log_S)/30000 + 
+  sum(aids_M_aug$death * log_h)/30000 + sum(log_s)/30000 + 
   sum(dnorm(aids_M_aug$samples, mean = 0, sd = sqrt(s2u), log = TRUE))/30000
 
   
