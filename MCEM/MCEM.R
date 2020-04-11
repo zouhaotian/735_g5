@@ -101,22 +101,19 @@ mcmc.sampler.all = function(data, data_aug, h0, beta0, beta1, beta, gamma, alpha
   return(data_aug)
 }
 
-qfunction = function(data, data_aug, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u) {
-  # data: aids
-  # datat_aug: augmented aids data with samples
-  n = length(unique(data$patient))
-  q = rep(0, n)
-  for (i in 1:n) {
-    yi = data_aug[patient == i, CD4]
-    xi = as.matrix(data_aug[patient == i, .(drug, gender, prevOI, AZT)])
-    ti = data_aug[patient == i, obstime]
-    deltai = data[patient == i, death][1]
-    Ti = data[patient == i, Time][1]
-    wi = data[patient == i, drug][1]
-    ui = data_aug[patient == i, samples]
-    q[i] = mean(lli(ui, yi, wi, Ti, xi, ti, deltai, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u))
-  }
-  return(mean(q))
+qfunction = function(data, data_aug, h0, beta0, beat1, beta, gamma, alpha, s2e, s2u, M = 10000, burn_in = 2000, sigma = 1.8){
+  aids_M_aug = mcmc.sampler.all(data, data_aug, h0, beta0, beta1, beta, gamma, alpha, s2e, s2u, M, burn_in, sigma)
+  X_aug = model.matrix(~ 1 + obstime + drug + gender + prevOI + AZT, data = aids_M_aug)
+  X_aug_surv = model.matrix(~ 1 + Time + drug + gender + prevOI + AZT, data = aids_M_aug)
+  m = X_aug %*% c(beta0, beta1, beta) + aids_M_aug[, samples]
+  m_surv = X_aug_surv %*% c(beta0, beta1, beta) + aids_M_aug[, samples]
+  aids_M_aug$log_h =  log(h0) + aids_M_aug$drug * gamma + alpha * m_surv
+  aids_M_aug$log_s = -exp(aids_M_aug$log_h) * (exp(alpha * beta1 * aids_M_aug$Time) - 1) / (alpha * beta1)
+  n = dim(data)[1]
+  q = sum(dnorm(aids_M_aug$CD4, mean = m, sd = sqrt(s2e), log = TRUE))/M + 
+    sum(aids_M_aug[, mean(log_h*death), by = patient][,2]) + sum(aids_M_aug[, mean(log_s), by = patient][,2]) + 
+    sum(aids_M_aug[, mean(dnorm(samples, mean = 0, sd = 1, log = TRUE)), by = patient][, 2])
+  return(q/n)
 }
 
 aids$drug = as.numeric(aids$drug) - 1
@@ -125,4 +122,12 @@ aids$prevOI = as.numeric(aids$prevOI) - 1
 aids$AZT = as.numeric(aids$AZT) - 1
 aids_aug = augment(aids, M = 1000)
 
+h0=1
+beta0 = 0.5
+beta1 = 1.5
+beta = c(0.6,0.7,0.8,0.9)
+gamma = 0.5
+alpha = 0.8
+s2e = 1
+s2u = 1
 
