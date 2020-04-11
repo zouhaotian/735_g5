@@ -120,7 +120,7 @@ aids$drug = as.numeric(aids$drug) - 1
 aids$gender = as.numeric(aids$gender) - 1
 aids$prevOI = as.numeric(aids$prevOI) - 1
 aids$AZT = as.numeric(aids$AZT) - 1
-aids_aug = augment(aids, M = 1000)
+aids_aug = augment(aids, M = 10000)
 
 h0=1
 beta0 = 0.5
