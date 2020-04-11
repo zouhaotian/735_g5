@@ -369,10 +369,14 @@ summary {
 </div>
 
 
+<div id="notes" class="section level2">
+<h2>NOTES</h2>
+<p>Aim for Introduction to the dataset and the question, a Methods section with any important pre-processing etc., three sections of Results (which may also contain some method details), and Discussion about interpretation or possible future directions.</p>
+</div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>The dataset we will examine for our project can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1408 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance vs AZT failure indicator.</p>
-<p>Since this dataset contains both longitudinal and survival data, we propose a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. A joint model is preferred to a two-step approach since previous studies have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates. For joint modelling, previous literature suggests that Bayesian methods are more efficient and computationally easier.</p>
+<p>Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. A joint model is preferred to a two-step approach since previous studies have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates. For joint modelling, previous literature suggests that Bayesian methods are more efficient and computationally easier.</p>
 </div>
 <div id="aims" class="section level2">
 <h2>Aims</h2>
@@ -414,9 +418,18 @@ summary {
 <h2>Simulation</h2>
 <p>We compare the model fitting results using the simulation set-up as follows:\ \ First, we simulate the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + u_i + _{ij} $, where <span class="math inline">\(u_i \sim N(0, 2), \epsilon_{ij} \sim N(0, 1)\)</span>. \ \ Second, we simulate N random uniform distribution, which corresponds to the survival probability. And we calculate the failure time as: <span class="math inline">\(h_i(T_i) = exp(-2) \exp(-1*w_i + 0.2*m_i(T_i))\)</span>, where $m_i(T_i) = 20 + (-1)*T_i + u_i $. And we can calculate the survival time using an explicit formula.\ \ We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as from the `aids’ data in the longitudinal model, and another 200 subjects as the testing dataset.</p>
 </div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
+</div>
+<div id="future-direction" class="section level1">
+<h1>Future direction</h1>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. \ \ \ \  \end{document}</p>
+<p>Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. \ \ \ \ </p>
+</div>
 </div>
 
 

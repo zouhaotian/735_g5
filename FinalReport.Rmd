@@ -12,6 +12,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ## NOTES
 Aim for Introduction to the dataset and the question, a Methods section with any important pre-processing etc., three sections of Results (which may also contain some method details), and Discussion about interpretation or possible future directions. 
 
+\\
+Introduction
+Project Aims
+Data description
+Methods
+-Processing the data
+-Model
+-3 things we plan to do (bayesian, MCEM, random survival forest)
+Results
+-3 things we plan to do (bayesian, MCEM, random survival forest)
+Discussion
+
 ## Introduction
 
 The dataset we will examine for our project can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1408 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance vs AZT failure indicator.
@@ -135,4 +147,4 @@ Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Mode
 \url{http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models}\\
 \\
 \url{http://www.drizopoulos.com/vignettes/dynamic_predictions}
-\end{document}
+
