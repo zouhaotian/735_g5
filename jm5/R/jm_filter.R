@@ -36,7 +36,7 @@ get_variable <- function(variable){
 #' @param l.formula the formula for longitudinal model
 #' @param s.formula the formula for survival model
 #' @param dat original dataset
-#' @param ID ID variable
+#' @param ID ID variable (can be factor, numeric or character)
 #' 
 #' @return a length-2 list: longitudinal and survival dataframe
 #'  
@@ -61,9 +61,12 @@ jm_filter <- function(l.formula, s.formula, dat, ID){
   ## if variables all exist in dataset, then we filter the variables to a matrix
   
   l.mat <- get_variable(l.variable)
-  l.mat$ID <- ID
+  ID.count <- as.numeric(table(ID))
+  ID.length <- length(ID.count)
+  l.mat$ID <- rep(1:ID.length, ID.count)
+  
   s.mat <- get_variable(s.variable)
-  s.mat$ID <- ID
+  s.mat$ID <- rep(1:ID.length, ID.count)
   s.mat <- unique(s.mat)
   
   if (sum(!complete.cases(l.mat))!=0){

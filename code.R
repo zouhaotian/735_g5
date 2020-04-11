@@ -15,6 +15,8 @@ kable(summary(l[[2]]))
 l.formula2 <- CD4 ~ obstime + drugddI + gendermale + prevOIAIDS + AZTfailure
 s.formula2 <- Surv(Time, death) ~ drugddI
 
+mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat)
+
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
 summary.mean <- summary(fit.result)$summary[, 1]
 summary.mean <- summary.mean[1:(length(summary.mean) - 1)]

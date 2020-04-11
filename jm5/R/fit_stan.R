@@ -57,16 +57,17 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
   nobs <- nrow(long.dat) ## number of observations
   count <- as.vector(table(long.dat$ID)) ## number of observation each subject
   index <- 1:nobs
+  
   ID.start <- rep(NA, n) ## starting index of each subject
   ID.end <- rep(NA, n) ## ending index of each subject
   attach(long.dat)
-  ID <- as.numeric(ID)
-  for (i in ID){
+  for (i in unique(ID)){
     tmp.index <- index[which(ID==i)]
     ID.start[i] <- min(tmp.index)
     ID.end[i] <- max(tmp.index)
   }
   detach(long.dat)
+  
   p.long <- ncol(long.dat) - 1 ## number of covariates for longitudinal
   p.surv <- ncol(surv.dat) - 3 ## number of covariates for survival
   

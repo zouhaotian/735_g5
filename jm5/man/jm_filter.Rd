@@ -13,7 +13,7 @@ jm_filter(l.formula, s.formula, dat, ID)
 
 \item{dat}{original dataset}
 
-\item{ID}{ID variable}
+\item{ID}{ID variable (can be factor, numeric or character)}
 }
 \value{
 a length-2 list: longitudinal and survival dataframe
