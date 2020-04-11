@@ -12,17 +12,19 @@ knitr::opts_chunk$set(echo = TRUE)
 ## NOTES
 Aim for Introduction to the dataset and the question, a Methods section with any important pre-processing etc., three sections of Results (which may also contain some method details), and Discussion about interpretation or possible future directions. 
 
-\\
-Introduction
-Project Aims
-Data description
-Methods
--Processing the data
--Model
--3 things we plan to do (bayesian, MCEM, random survival forest)
-Results
--3 things we plan to do (bayesian, MCEM, random survival forest)
-Discussion
+\
+
+Introduction\
+
+Project Aims\
+Data description\
+Methods\
+-Processing the data\
+-Model\
+-3 things we plan to do (bayesian, MCEM, random survival forest)\
+Results\
+-3 things we plan to do (bayesian, MCEM, random survival forest)\
+Discussion\
 
 ## Introduction
 
