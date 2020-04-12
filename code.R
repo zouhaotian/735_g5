@@ -9,7 +9,7 @@ l <- jm_filter(l.formula, s.formula, dat, dat$patient)
 long.dat <- l[[1]]
 surv.dat <- l[[2]]
 
-## summary statistics
+## summary statistics (need to edit)
 
 l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
 s.formula2 <- Surv(Time, death) ~ drugddI
@@ -21,4 +21,4 @@ summary.mean <- summary(fit.result)$summary[, 1]
 summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
 
 #save.image('1.RData')
-
+cv.dat <- create_cv(long.dat, surv.dat)
