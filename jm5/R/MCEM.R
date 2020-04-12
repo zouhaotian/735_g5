@@ -27,7 +27,7 @@ log.lik.aug <- function(y.aug, t.aug, x.aug, T.aug, d.aug, w.aug, tmp.paras, p.l
   logh.aug <- logh0 + (w.aug %*% gamma)[, 1] + 
     alpha*((latent.dat.aug %*% c(beta0, beta))[, 1] + beta1*T.aug + re.sample)
   logS.aug <- -exp(logh0 + (w.aug %*% gamma)[, 1] + alpha*((latent.dat.aug %*% c(beta0, beta))[, 1] + re.sample))*
-    (exp(alpha*beta1*T.aug) - 1)/(alpha*beta1*T.aug)
+    (exp(alpha*beta1*T.aug) - 1)/(alpha*beta1)
   
   ll <- sum(dnorm(y.aug, long.mu.aug, sigma_e, log = T)) + 
     sum(d.aug*logh.aug + logS.aug)
@@ -216,7 +216,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       loghi.nore <- theta$logh0 + (wi %*% theta.old$gamma)[, 1] + 
         theta.old$alpha*(long.const.mui[1] + theta.old$beta1*Ti)
       logSi.nore <- -exp(theta$logh0 + (wi %*% theta.old$gamma)[, 1] + theta.old$alpha*long.const.mui[1])*
-        (exp(theta$alpha*theta$beta1*Ti) - 1)/(theta$alpha*theta$beta1*Ti)
+        (exp(theta$alpha*theta$beta1*Ti) - 1)/(theta$alpha*theta$beta1)
       fixed.eff <- list(long.mui.nore = long.mui.nore,
                         loghi.nore = loghi.nore,
                         logSi.nore = logSi.nore)
@@ -272,5 +272,6 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       warning('Iteration reached maximum without convergence!')
     }
   }
-  return(theta)
+  k <- unlist(theta)
+  return(k)
 }
