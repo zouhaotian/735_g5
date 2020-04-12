@@ -22,7 +22,7 @@ summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
 
 #save.image('1.RData')
 cv.dat <- create_cv(long.dat, surv.dat)
-st <- c(6, 12) ## starting time
+st <- c(2, 4, 6) ## starting time
 dt <- c(0.5, 1) ## prediction time window
 mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
@@ -59,5 +59,6 @@ for (i in 1:length(cv.dat)){
   mcem.auc.bs.mean <- mcem.auc.bs.mean + mcem.auc.bs
   stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
 }
-cat(mcem.auc.bs.mean/length(cv.dat))
-cat(stan.auc.bs.mean/length(cv.dat))
+
+mcem.auc.bs.mean/length(cv.dat)
+stan.auc.bs.mean/length(cv.dat)
