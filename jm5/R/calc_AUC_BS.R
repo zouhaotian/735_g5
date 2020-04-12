@@ -57,15 +57,10 @@ MH.rw <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M,
 #' 
 #' @return a Stan fit object
 #'  
-#' @examples
 #' 
-#' fit_stan(CD4 ~ obstime, Surv(Time, death) ~ drugddI, 
-#' jm_filter(CD4 ~ obstime, Surv(Time, death) ~ drug, JM::aids, JM::aids$patient)[[1]],
-#' jm_filter(CD4 ~ obstime, Surv(Time, death) ~ drug, JM::aids, JM::aids$patient)[[2]])
-#' 
-#' @importFrom nlme lme VarCorr
-#' @importFrom survival Surv survreg
-#' @importFrom rstan rstan_options stan_model sampling 
+#' @importFrom survival Surv
+#' @importFrom tdROC tdROC
+#' @importFrom ipred sbrier
 #' 
 #' @export
 calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test, 
