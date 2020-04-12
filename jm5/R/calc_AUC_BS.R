@@ -38,8 +38,39 @@ MH.rw <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M,
   return(u[(burnin+1):(M+burnin)])
 }
 
+
+#' Calculate time-dependent AUC and BS 
+#'
+#' This function allows you to pass in longitudinal and survival
+#' formula, with the longitudinal and survival test dataset, 
+#' start time, stop time and estimated parameters, to calculate
+#' time-dependent Area Under Curve for ROC, and Brier Score
+#' 
+#' @param l.formula the formula for longitudinal model
+#' @param s.formula the formula for survival model
+#' @param long.test the longitudinal test set
+#' @param surv.dat the survival test set
+#' @param Tstart starting time
+#' @param Tstop stop time
+#' @param summary.mean estimated parameters value (mean)
+#' @param seed random seed (default = 123)
+#' 
+#' @return a Stan fit object
+#'  
+#' @examples
+#' 
+#' fit_stan(CD4 ~ obstime, Surv(Time, death) ~ drugddI, 
+#' jm_filter(CD4 ~ obstime, Surv(Time, death) ~ drug, JM::aids, JM::aids$patient)[[1]],
+#' jm_filter(CD4 ~ obstime, Surv(Time, death) ~ drug, JM::aids, JM::aids$patient)[[2]])
+#' 
+#' @importFrom nlme lme VarCorr
+#' @importFrom survival Surv survreg
+#' @importFrom rstan rstan_options stan_model sampling 
+#' 
+#' @export
 calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test, 
-                        Tstart, Tstop, summary.mean){
+                        Tstart, Tstop, summary.mean, seed = 123){
+  set.seed(seed)
   
   ## Check existence of variable
   attach(long.test)
@@ -105,6 +136,12 @@ calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test,
     Si <- exp(logSi.Tstop - logSi.Tstart)
     surv.prob.est[ID.index] <- mean(Si)
   }
-  
-  
+  ROC.est <- tdROC(X = 1 - surv.prob.est, Y = surv.filtered[, 1], 
+                   delta = surv.filtered[, 2], tau = Tstop,
+                   span = 0.1, alpha = 0.05,
+                   n.grid = 1000, cut.off = 0.5)
+  AUC <- ROC.est$AUC$value
+  surv.obj <- Surv(surv.filtered[, 1], surv.filtered[, 2])
+  BS <-  sbrier(surv.obj, surv.prob.est, btime = Tstop)
+  return(c(AUC, BS))
 }
