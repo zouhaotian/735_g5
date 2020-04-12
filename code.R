@@ -23,7 +23,7 @@ summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
 #save.image('1.RData')
 cv.dat <- create_cv(long.dat, surv.dat)
 st <- c(6, 12) ## starting time
-dt <- c(2, 4, 6) ## prediction time window
+dt <- c(0.5, 1) ## prediction time window
 for (i in 1:length(cv.dat)){
   ## training data and testing data
   long.train <- cv.dat[[i]][[1]]

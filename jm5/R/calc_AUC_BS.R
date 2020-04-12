@@ -15,20 +15,20 @@ filter_dat <- function(long.test, surv.test, Tstart){
   return(l)
 }
 
-log.lik <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, ut, fixed.eff){
+log.lik2 <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, ut, fixed.eff){
   ll <- sum(dnorm(yi, fixed.eff$long.mui.nore + ut, sigma_e, log = T)) + 
     di*(fixed.eff$loghi.nore + alpha*ut) + fixed.eff$logSi.nore*exp(alpha*ut) + 
     dnorm(ut, 0, sigma_u, log = T)
   return(ll)
 }
 
-MH.rw <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M, burnin){
+MH.rw2 <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M, burnin){
   u <- rep(NA, M + burnin)
   u[1] <- rnorm(1, sd = sigma_u)
   for (m in 1:(M + burnin - 1)){
     u[m+1] <- u[m] + runif(1, -1, 1)
-    logR.numerator <- log.lik(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, u[m+1], fixed.eff)
-    logR.denominator <- log.lik(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, u[m], fixed.eff)
+    logR.numerator <- log.lik2(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, u[m+1], fixed.eff)
+    logR.denominator <- log.lik2(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, u[m], fixed.eff)
     R <- exp(logR.numerator - logR.denominator)
     keep <- rbinom(1, 1, min(R, 1))
     if (keep!=1){
@@ -123,7 +123,7 @@ calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test,
                       loghi.nore = loghi.nore,
                       logSi.nore = logSi.nore)
     
-    u <- MH.rw(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M, burnin)
+    u <- MH.rw2(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M, burnin)
     logSi.Tstart <- -exp(logh0 + (wi %*% gamma)[, 1] + alpha*long.const.mui[1])*
       (exp(alpha*beta1*Tstart) - 1)/(alpha*beta1)*exp(alpha*u)
     logSi.Tstop <- -exp(logh0 + (wi %*% gamma)[, 1] + alpha*long.const.mui[1])*
@@ -137,6 +137,6 @@ calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test,
                    n.grid = 1000, cut.off = 0.5)
   AUC <- ROC.est$AUC$value
   surv.obj <- Surv(surv.filtered[, 1], surv.filtered[, 2])
-  BS <-  sbrier(surv.obj, surv.prob.est, btime = Tstop)
+  BS <- sbrier(surv.obj, surv.prob.est, btime = Tstop)
   return(c(AUC, BS))
 }
