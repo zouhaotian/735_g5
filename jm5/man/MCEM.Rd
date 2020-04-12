@@ -10,7 +10,7 @@ MCEM(
   long.dat,
   surv.dat,
   max.iter = 30,
-  tol = 0.0001,
+  tol = 0.001,
   seed = 123
 )
 }
@@ -25,7 +25,7 @@ MCEM(
 
 \item{max.iter}{maximum iterations allowed (default = 30)}
 
-\item{tol}{tolerance (default = 1e-4)}
+\item{tol}{tolerance (default = 1e-3)}
 
 \item{seed}{random seed (default = 123)}
 }

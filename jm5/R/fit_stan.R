@@ -30,7 +30,7 @@ check_exist <- function(variable){
 #' jm_filter(CD4 ~ obstime, Surv(Time, death) ~ drug, JM::aids, JM::aids$patient)[[2]])
 #' 
 #' @importFrom nlme lme VarCorr
-#' @importFrom survival Surv coxph
+#' @importFrom survival Surv survreg
 #' @importFrom rstan rstan_options stan_model sampling 
 #' 
 #' @export
@@ -87,8 +87,11 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
   surv.dat2 <- cbind(surv.dat, mu_hat)
   s.formula2 <- update(s.formula, ~. + mu_hat)
   
-  fit.surv <- coxph(s.formula2, method = 'breslow', data = surv.dat2)
+  fit.surv <- survreg(s.formula2, data = surv.dat2, dist = 'exponential')
   coef.surv <- unname(fit.surv$coefficients)
+  logh0_hat <- -coef.surv[1]
+  gamma_hat <- -coef.surv[2:(p.surv+1)]
+  alpha_hat <- -coef.surv[length(coef.surv)]
   
   ## Second, we put all required data into a list, and define parameters
   stanDat <- list(n = n, nobs = nobs, P1 = p.long, P2 = p.surv,
@@ -99,12 +102,13 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
                   W = as.matrix(surv.dat[, 3:(ncol(surv.dat) - 1)]),
                   TIME = surv.dat[, 1],
                   STATUS = surv.dat[, 2])
-  pars <- c('beta', 'logh0', 'gamma', 'alpha', 'sigma_u', 'sigma_e')
-  inits <- list(beta = coef.lme, logh0 = 0,
-                gamma = as.array(coef.surv[-length(coef.surv)]), 
-                alpha = coef.surv[length(coef.surv)],
+  pars <- c('beta', 'sigma_u', 'sigma_e','logh0', 'gamma', 'alpha')
+  inits <- list(beta = coef.lme,
                 sigma_u = sigma_u_hat,
-                sigma_e = sigma_e_hat)
+                sigma_e = sigma_e_hat,
+                logh0 = logh0_hat,
+                gamma = as.array(gamma_hat), 
+                alpha = alpha_hat)
   inits <- list(c1 = inits, c2 = inits, c3 = inits, c4 = inits)
   
   ## Third, we perform sampling
@@ -127,12 +131,13 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
     }
     parameters{
       vector[P1] beta;
+      real <lower=0> sigma_u;
+      real <lower=0> sigma_e;
+      
       real logh0;
       vector[P2] gamma;
       real alpha;
       
-      real <lower=0> sigma_u;
-      real <lower=0> sigma_e;
       real u[n];
     }
     transformed parameters{

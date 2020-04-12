@@ -14,6 +14,26 @@ log.lik <- function(yi, ti, xi, Ti, di, wi, theta, ut, fixed.eff){
   return(ll)
 }
 
+log.lik.aug <- function(y.aug, t.aug, x.aug, T.aug, d.aug, w.aug, tmp.paras, p.long, p.surv, re.sample.aug, re.sample, latent.dat.aug){
+  beta0 <- tmp.paras[1] 
+  beta1 <- tmp.paras[2]
+  beta <- tmp.paras[3:p.long]
+  sigma_e <- tmp.paras[p.long+2]
+  logh0 <- tmp.paras[p.long+3]
+  gamma <- tmp.paras[(p.long+4):(p.long+p.surv+3)] 
+  alpha <- tmp.paras[length(tmp.paras)]
+  
+  long.mu.aug <- beta0 + beta1*t.aug + (x.aug %*% beta)[, 1] + re.sample.aug
+  logh.aug <- logh0 + (w.aug %*% gamma)[, 1] + 
+    alpha*((latent.dat.aug %*% c(beta0, beta))[, 1] + beta1*T.aug + re.sample)
+  logS.aug <- -exp(logh0 + (w.aug %*% gamma)[, 1] + alpha*((latent.dat.aug %*% c(beta0, beta))[, 1] + re.sample))*
+    (exp(alpha*beta1*T.aug) - 1)/(alpha*beta1*T.aug)
+  
+  ll <- sum(dnorm(y.aug, long.mu.aug, sigma_e, log = T)) + 
+    sum(d.aug*logh.aug + logS.aug)
+  return(ll)
+}
+
 MH.rw <- function(yi, ti, xi, Ti, di, wi, theta, fixed.eff, M, burnin){
   u <- rep(NA, M + burnin)
   u[1] <- rnorm(1, sd = theta$sigma_u)
@@ -52,7 +72,7 @@ tolerance <- function(theta.1, theta.2){
 #' @param long.dat the longitudinal dataset
 #' @param surv.dat the survival dataset
 #' @param max.iter maximum iterations allowed (default = 30)
-#' @param tol tolerance (default = 1e-4)
+#' @param tol tolerance (default = 1e-3)
 #' @param seed random seed (default = 123)
 #' 
 #' @return a list of estimated parameters
@@ -69,7 +89,7 @@ tolerance <- function(theta.1, theta.2){
 #' @export
 
 MCEM <- function(l.formula, s.formula, long.dat, surv.dat, 
-                 max.iter = 30, tol = 1e-4, seed = 123){
+                 max.iter = 30, tol = 1e-3, seed = 123){
   
   set.seed(seed)
   ## Check existence of variable
@@ -130,21 +150,23 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
   surv.dat2 <- cbind(surv.dat, mu_hat)
   s.formula2 <- update(s.formula, ~. + mu_hat)
   
-  fit.surv <- coxph(s.formula2, method = 'breslow', data = surv.dat2)
+  fit.surv <- survreg(s.formula2, data = surv.dat2, dist = 'exponential')
   coef.surv <- unname(fit.surv$coefficients)
-  gamma <- coef.surv[1:p.surv]
-  alpha <- coef.surv[p.surv+1]
+  logh0 <- -coef.surv[1]
+  gamma <- -coef.surv[2:(p.surv+1)]
+  alpha <- -coef.surv[length(coef.surv)]
   
   inits <- list(beta0 = beta0, beta1 = beta1, beta = beta, 
                 sigma_u = sigma_u, sigma_e = sigma_e,
-                logh0 = 0, gamma = gamma, alpha = alpha)
+                logh0 = logh0, gamma = gamma, alpha = alpha)
   theta <- inits
   
   ## specify tuning parameters for EM algorithm
   iter <- 0 ## current iteration
-  curr.tol <- Inf ## current tolerance
-  M <- 5000 ## total 5000 samples
-  burnin <- 2000 ## with 2000 burnin period
+  curr.tol <- 1 ## current tolerance
+  M <- 100 ## total random effect samples
+  M.paras <- 1000 ## total parameter samples
+  burnin <- 1000 ## with burnin period
   
   ## augment data ##
   long.dat.aug <- matrix(NA, nobs*M, ncol(long.dat))
@@ -153,6 +175,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
   for (i in 1:nobs){
     long.dat.aug[((i-1)*M+1):(i*M), ] <- matrix(rep(as.numeric(long.dat[i, ]), M), M, ncol(long.dat), byrow = T)
   }
+  
   for (i in 1:n){
     surv.dat.aug[((i-1)*M+1):(i*M), ] <- matrix(rep(as.numeric(surv.dat[i, ]), M), M, ncol(surv.dat), byrow = T)
     latent.dat.aug[((i-1)*M+1):(i*M), ] <- matrix(rep(as.numeric(latent.dat[i, ]), M), M, ncol(latent.dat), byrow = T)
@@ -161,6 +184,14 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
   colnames(surv.dat.aug) <- colnames(surv.dat)
   long.dat.aug <- data.frame(long.dat.aug)
   surv.dat.aug <- data.frame(surv.dat.aug)
+  
+  y.aug <- long.dat.aug[, 1]
+  t.aug <- long.dat.aug[, 2]
+  x.aug <- as.matrix(long.dat.aug[, 3:(ncol(long.dat.aug)-1)])
+  
+  T.aug <- surv.dat.aug[, 1]
+  d.aug <- surv.dat.aug[, 2]
+  w.aug <- as.matrix(surv.dat.aug[, 3:(ncol(surv.dat.aug)-1)])
   
   while (iter<max.iter & curr.tol>tol){
     iter <- iter + 1
@@ -185,7 +216,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       loghi.nore <- theta$logh0 + (wi %*% theta.old$gamma)[, 1] + 
         theta.old$alpha*(long.const.mui[1] + theta.old$beta1*Ti)
       logSi.nore <- -exp(theta$logh0 + (wi %*% theta.old$gamma)[, 1] + theta.old$alpha*long.const.mui[1])*
-        exp(theta$alpha*theta$beta1*Ti - 1)/(theta$alpha*theta$beta1*Ti)
+        (exp(theta$alpha*theta$beta1*Ti) - 1)/(theta$alpha*theta$beta1*Ti)
       fixed.eff <- list(long.mui.nore = long.mui.nore,
                         loghi.nore = loghi.nore,
                         logSi.nore = logSi.nore)
@@ -196,28 +227,44 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       re.sample.aug[start:end] <- rep(u, count[i]) 
     }
     
-    long.dat.aug2 <- cbind(long.dat.aug, u = re.sample.aug)
+    ## M-step: we use MH.rw rather than directly maximizing the likelihood
+    ## paras.est: beta0, beta1, beta, sigma_u, sigma_e, logh0
+    surv.paras <- as.numeric(unlist(theta))[-(1:(p.long+3))]
+    paras.est <- matrix(NA, (M.paras+burnin), p.long+3)
+    paras.est[1, ] <- as.numeric(unlist(theta))[1:(p.long+3)]
+    paras.est[, p.long+1] <- sd(re.sample)
+    long.dat.aug2 <- cbind(long.dat.aug, re.sample.aug)
+    paras.est[, p.long+2] <- sigma(lm(l.formula, data=long.dat.aug2, offset = re.sample.aug))
     
-    ## M-step ##
-    lm.fit <- as.numeric(lm(l.formula, data = long.dat.aug2, offset = u)$coefficients)
-    sigma_e_new <- sigma(lm(l.formula, data = long.dat.aug2, offset = u))
-    sigma_u_new <- sd(re.sample)
+    for (m in 1:(M.paras+burnin-1)){
+      paras.est[m+1, -((p.long+1):(p.long+2))] <- paras.est[m, -((p.long+1):(p.long+2))] + 0.1*curr.tol*runif(1, -1, 1)
+      full.paras.est.new <- c(paras.est[m+1, ], surv.paras)
+      full.paras.est.old <- c(paras.est[m, ], surv.paras)
+      logR.numerator <- log.lik.aug(y.aug, t.aug, x.aug, T.aug, d.aug, w.aug, full.paras.est.new, p.long, p.surv, re.sample.aug, re.sample, latent.dat.aug)
+      logR.denominator <- log.lik.aug(y.aug, t.aug, x.aug, T.aug, d.aug, w.aug, full.paras.est.old, p.long, p.surv, re.sample.aug, re.sample, latent.dat.aug)
+      R <- exp(logR.numerator - logR.denominator)
+      keep <- rbinom(1, 1, min(1, R))
+      if (keep!=1){
+        paras.est[m+1, ] <- paras.est[m, ]
+      }
+    }
     
-    mu_hat_aug <- as.vector((latent.dat %*% lm.fit[-2])[, 1] + re.sample)
-    surv.dat.aug2 <- cbind(surv.dat.aug, mu_hat_aug)
-    s.formula3 <- update(s.formula, ~. + mu_hat_aug)
-    surv.fit <- survreg(s.formula3, data = surv.dat.aug2, dist = 'exponential')
-    surv.coef <- as.numeric(surv.fit$coefficients)
+    theta$beta0 <- mean(paras.est[(M.paras+1):(M.paras+burnin), 1])
+    theta$beta1 <- mean(paras.est[(M.paras+1):(M.paras+burnin), 2])
+    theta$beta <- colMeans(paras.est[(M.paras+1):(M.paras+burnin), 3:p.long])
+    theta$sigma_u <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 1])
+    theta$sigma_e <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 2])
+    theta$logh0 <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 3])
     
-    theta$beta0 <- lm.fit[1]
-    theta$beta1 <- lm.fit[2]
-    theta$beta <- lm.fit[3:length(lm.fit)]
-    theta$sigma_u <- sigma_u_new
-    theta$sigma_e <- sigma_e_new
-    theta$logh0 <- -surv.coef[1]
-    theta$gamma <- -surv.coef[2:(1+p.surv)]
-    theta$alpha <- -surv.coef[length(surv.coef)]
-    
+    ## maximize survival part
+    mu_hat <- (latent.dat.aug %*% c(theta$beta0, theta$beta))[, 1] + re.sample
+    surv.dat.aug2 <- cbind(surv.dat.aug, mu_hat)
+    s.formula2 <- update(s.formula, ~. + mu_hat)
+    fit.surv <- coxph(s.formula2, data = surv.dat.aug2, method = 'breslow')
+    coef.surv <- unname(fit.surv$coefficients)
+    theta$gamma <- coef.surv[1:p.surv]
+    theta$alpha <- coef.surv[p.surv+1]
+
     ## Calculate tolerance
     curr.tol <- tolerance(theta, theta.old)
     cat(sprintf('Iter:%d curr.tol:%.6f\n', iter, curr.tol))
