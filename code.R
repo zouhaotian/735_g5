@@ -51,7 +51,7 @@ for (i in 1:length(cv.dat)){
       stan.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
                                           long.test, surv.test,
                                           Tstart, Tstart+Tdelta, 
-                                          mcem.train.mean)
+                                          stan.train.mean)
     }
   }
 }
