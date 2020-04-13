@@ -1,4 +1,4 @@
-#Data Simulation
+#Data Simulation based on Propsal_v3
 # We compare the model fitting results using the simulation set-up as follows:
   
 # We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18)
@@ -37,8 +37,13 @@ head(dat2)
 # We calculate the failure time as: hi(Ti) = exp(-2) exp(-1*wi + 0:2 *mi(Ti)), 
 # where mi(Ti) = 20 + (-1) * Ti + (-4) * xi + ui.
 # And we can calculate the survival time using an explicit formula.
-# 
 
-N = as.vector(runif(n,0,1)) #survival probability
-mi_ti = 20 + (-1)*Ti + (-4)*xi + ui
-hi_ti = exp(-2)*exp(-1*wi+0.2*mi_ti)
+dat_tmp = dat2[ which(dat2$time==0), ]
+dat_tmp$time <- NULL
+dat_tmp$eij <- NULL
+dat_tmp$Yij <- NULL
+dat_tmp$N = runif(n,0,1) #survival probability
+#define Ti and wi
+dat_tmp$mi_ti = 20 + (-1)*dat_tmp$Ti + (-4)*dat_tmp$xi + dat_tmp$ui
+dat_tmp$hi_ti = exp(-2)*exp(-1*dat_tmp$wi+0.2*dat_tmp$mi_ti) #actual failure time
+head(dat_tmp,10)
