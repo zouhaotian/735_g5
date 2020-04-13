@@ -394,43 +394,67 @@ Discussion<br />
 </div>
 <div id="aims" class="section level2">
 <h2>Aims</h2>
-<p>Our study aims are as follows:\</p>
-<p>(1). We will assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, gender, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance.\</p>
-<p>(2). We will use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent longitudinal mean.\</p>
-<p>(3). We will assess and compare the model fitting result (mean and standard error) for the MCEM method and Bayesian method, and machine learning method (RSF). We will also do a simulation to compare the model fitting result.\</p>
+<p>Our study aims are as follows:</p>
+<p>(1). We will assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, gender, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance.</p>
+<p>(2). We will use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent longitudinal mean.</p>
+<p>(3). We will assess and compare the model fitting result (mean and standard error) for the MCEM method and Bayesian method, and machine learning method (RSF). We will also do a simulation to compare the model fitting result.</p>
 <p>(4). We will also propose the prediction to patients with some longitudinal outcomes available (see Method section for detailed demonstration).</p>
 </div>
 <div id="methods" class="section level2">
 <h2>Methods</h2>
 <p>Joint modelling framework: <span class="math display">\[\begin{align}
-    Y_{ij} =&amp; m_i(t_{ij}) + \epsilon_{ij}\\
+    Y_{ij} =&amp; m_i(t_{ij}) + \epsilon_{ij} 
     h_i(T_i) =&amp; h_0\exp(\boldsymbol{w_i'}\boldsymbol{\gamma} + \alpha m_i(T_i))
-\end{align}\]</span> where $ m_i(t_{ij}) = <em>0 + <em>1 t</em>{ij} + ’  + u_i $ and <span class="math inline">\(m_i(T_i) = \beta_0 + \beta_1 T_{i} + x_i'\beta + u_i\)</span> \ \ We have $ i=1,2, , n$ subjects, <span class="math inline">\(j = 1, 2,\dots, J_i\)</span> visits for each subject. We observe the longitudinal outcome <span class="math inline">\(Y_{ij}\)</span> for subject i at visit j, and we observe the patient’s covariate <span class="math inline">\(\boldsymbol{x_{ij}}\)</span> at time <span class="math inline">\(t_{ij}\)</span>. We also observe the event time <span class="math inline">\(T_i = \text{min}(T_i^*, C_i)\)</span>, where <span class="math inline">\(T_i^*\)</span> is the actual failure time, and $C_i $ is the censoring time. We also observe the censoring indicator <span class="math inline">\(\delta_i = I(T_i^*\leq C_i)\)</span>, and drug type $ $. \ \ Here, <span class="math inline">\(m_i(t_{ij})\)</span> is the latent longitudinal mean at time <span class="math inline">\(t_{ij}\)</span>, and $u_i $ is the random effect for each subject <span class="math inline">\(i\)</span>. And <span class="math inline">\(h_i(T_i)\)</span> is the hazard function for subject <span class="math inline">\(i\)</span>, and <span class="math inline">\(h_0\)</span> is the baseline hazard function.\ \ Assumption: <span class="math inline">\(u_i \sim N(0, \sigma_u^2)\)</span>; <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma_e^2)\)</span>; <span class="math inline">\(Y_{ij} |u_i \indep Y_{ij'}|u_i\)</span>; <span class="math inline">\(T_i^* \indep C_i\)</span>; $T_i Y</em>{ij} | u_i $.\ \ We write the parameter space <span class="math inline">\(\boldsymbol{\theta} = (\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma_e, \boldsymbol{\gamma}, \alpha)'\)</span>. We posit a non-parametric function to the baseline hazard function.\ \ We write the full data likelihood: <span class="math display">\[\begin{align}
+\end{align}\]</span> where <span class="math inline">\(m_i(t_{ij}) = \beta_0 + \beta_1 t_{ij} + \boldsymbol{x_{ij}}' \boldsymbol{\beta} + u_i\)</span> and <span class="math inline">\(m_i(T_i) = \beta_0 + \beta_1 T_{i} + x_i'\beta + u_i\)</span>.</p>
+<p>We have $ i=1,2, , n$ subjects, <span class="math inline">\(j = 1, 2,\dots, J_i\)</span> visits for each subject. We observe the longitudinal outcome <span class="math inline">\(Y_{ij}\)</span> for subject i at visit j, and we observe the patient’s covariate <span class="math inline">\(\boldsymbol{x_{ij}}\)</span> at time <span class="math inline">\(t_{ij}\)</span>. We also observe the event time <span class="math inline">\(T_i = \text{min}(T_i^*, C_i)\)</span>, where <span class="math inline">\(T_i^*\)</span> is the actual failure time, and $C_i $ is the censoring time. We also observe the censoring indicator <span class="math inline">\(\delta_i = I(T_i^*\leq C_i)\)</span>, and drug type $ $.</p>
+<p>Here, <span class="math inline">\(m_i(t_{ij})\)</span> is the latent longitudinal mean at time <span class="math inline">\(t_{ij}\)</span>, and $u_i $ is the random effect for each subject <span class="math inline">\(i\)</span>. And <span class="math inline">\(h_i(T_i)\)</span> is the hazard function for subject <span class="math inline">\(i\)</span>, and <span class="math inline">\(h_0\)</span> is the baseline hazard function.</p>
+<p>Assumption: <span class="math inline">\(u_i \sim N(0, \sigma_u^2)\)</span>; <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma_e^2)\)</span>; <span class="math inline">\(Y_{ij} |u_i \perp \!\!\! \perp Y_{ij'}|u_i\)</span>; <span class="math inline">\(T_i^* \perp \!\!\! \perp C_i\)</span>; <span class="math inline">\(T_i \perp \!\!\! \perp Y_{ij} | u_i\)</span>.</p>
+<p>We write the parameter space <span class="math inline">\(\boldsymbol{\theta} = (\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma_e, \boldsymbol{\gamma}, \alpha)'\)</span>. We posit a non-parametric function to the baseline hazard function.</p>
+<p>We write the full data likelihood: <span class="math display">\[\begin{align}
     L(\boldsymbol{\theta} | Y, T) = \prod_{i=1}^n \int_{-\infty}^{\infty} [\prod_{j=1}^{J_i} P(Y_{ij} | \beta, u_i)] [h_i(T_i)^{\delta_i} S_i(T_i)] P(u_i|\sigma_u^2) du 
 \end{align}\]</span> We write the complete data likelihood (assume random effect is known): <span class="math display">\[\begin{align}
     L_C(\boldsymbol{\theta} | Y, T) = \prod_{i=1}^n [\prod_{j=1}^{J_i} P(Y_{ij} | \beta, u_i)] [h_i(T_i)^{\delta_i} S_i(T_i)] P(u_i|\sigma_u^2) 
 \end{align}\]</span></p>
 <p>We can write the complete data likelihood, treating all parameters as random (Bayesian prospective): <span class="math display">\[\begin{align}
     L_B(\boldsymbol{\theta} | Y, T) = \prod_{i=1}^n [\prod_{j=1}^{J_i} P(Y_{ij} | \beta, u_i)] [h_i(T_i)^{\delta_i} S_i(T_i)] P(u_i|\sigma_u^2) P(\boldsymbol{\theta})
-\end{align}\]</span> where we denote $ P()$ as the prior distribution of <span class="math inline">\(\boldsymbol{\theta}\)</span>.\ \ Suppose for a new subject <span class="math inline">\(i'\)</span>, and we observe his longitudinal outcomes and covariates up to time <span class="math inline">\(T\)</span>, where <span class="math inline">\(j_{i'}\)</span> is the number of visits up to time <span class="math inline">\(T\)</span> for subject <span class="math inline">\(i'\)</span>. We want to predict his future longitudinal outcomes, and survival probability at time <span class="math inline">\(T'\)</span>.\ \ We can sample the random effect for the subject <span class="math inline">\(i'\)</span> using the following equation: <span class="math display">\[\begin{align}
+\end{align}\]</span> where we denote $ P()$ as the prior distribution of <span class="math inline">\(\boldsymbol{\theta}\)</span>.</p>
+<p>Suppose for a new subject <span class="math inline">\(i'\)</span>, and we observe his longitudinal outcomes and covariates up to time <span class="math inline">\(T\)</span>, where <span class="math inline">\(j_{i'}\)</span> is the number of visits up to time <span class="math inline">\(T\)</span> for subject <span class="math inline">\(i'\)</span>. We want to predict his future longitudinal outcomes, and survival probability at time <span class="math inline">\(T'\)</span>.</p>
+<p>We can sample the random effect for the subject <span class="math inline">\(i'\)</span> using the following equation: <span class="math display">\[\begin{align}
     P(u_{i'} | Y_{i'}^{(T)}, T_{i'}&gt;T, \boldsymbol{\hat \theta}) \propto \prod_{j=1}^{j_{i'}} P(Y_{i'j} |u_i', \boldsymbol{\hat \theta}) P(T_{i'}&gt;T | u_{i'}, \boldsymbol{\hat \theta}) P(u_{i'} | \boldsymbol{\hat \theta})
-\end{align}\]</span> We sample from the above distribution, using sampling methods from module 2.\ \ Suppose we have D samples of <span class="math inline">\(u_{i'}\)</span>, we can then predict his longitudinal outcomes at time <span class="math inline">\(T'\)</span>, and his conditional survival probability at time <span class="math inline">\(T'\)</span> as: <span class="math display">\[\begin{align}
-    m_{i'}(T') =&amp; \hat \beta_0 + \hat \beta_1 T' + \boldsymbol{x_{i'j}'} \boldsymbol{\hat \beta} + u_{i'}^{(d)} \\
+\end{align}\]</span> We sample from the above distribution, using sampling methods from module 2.</p>
+<p>Suppose we have D samples of <span class="math inline">\(u_{i'}\)</span>, we can then predict his longitudinal outcomes at time <span class="math inline">\(T'\)</span>, and his conditional survival probability at time <span class="math inline">\(T'\)</span> as: <span class="math display">\[\begin{align}
+    m_{i'}(T') =&amp; \hat \beta_0 + \hat \beta_1 T' + \boldsymbol{x_{i'j}'} \boldsymbol{\hat \beta} + u_{i'}^{(d)}  
     P(T_{i'}&gt;T' | T_{i'}&gt;T) =&amp; S_{i'}(T' |  \boldsymbol{\hat \theta}, u_{i'}^{(d)})/S_{i'}(T  | \boldsymbol{\hat \theta}, u_{i'}^{(d)})
 \end{align}\]</span></p>
 <p>We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy.</p>
 
-<p>We propose to use EM algorithm, Bayesian methods, and machine learning methods to estimate parameters.\</p>
-<p>For EM algorithm: Suppose we have the parameter estimate at iteration <span class="math inline">\(t\)</span>. We can sample the random effect <span class="math inline">\(u_i\)</span> from the posterior distribution of <span class="math inline">\(u_i\)</span>, and do the maximization step.\ \</p>
+<p>We propose to use EM algorithm, Bayesian methods, and machine learning methods to estimate parameters.</p>
+<p>For EM algorithm: Suppose we have the parameter estimate at iteration <span class="math inline">\(t\)</span>. We can sample the random effect <span class="math inline">\(u_i\)</span> from the posterior distribution of <span class="math inline">\(u_i\)</span>, and do the maximization step.</p>
 <p>We propose the Q-function as: <span class="math display">\[\begin{align}
-    Q(Y|\theta^{(t)}) =&amp; E(l_c(\theta^{(t)}|Y, T)) \\
+    Q(Y|\theta^{(t)}) =&amp; E(l_c(\theta^{(t)}|Y, T))  
     =&amp; \sum_{i=1}^n \int l_i(\theta | Y_i, T_i) f(u_i | \theta^{(t)}, Y_i, T_i) du
-\end{align}\]</span> where $l_i(| Y_i, T_i) = <em>{j=1}^{J_i} log P(Y</em>{ij}|, u_i) + log[h_i(T_i)^{_i}S_i(T_i)] + log P(u_i |) $, \ \ $f(u_i | ^{(t)}, Y_i, T_i) <em>{j=1}^{j_i} P(Y</em>{ij} |u_i, ) h_i(T_i | <sup>{(t)})</sup>{<em>i}S_i(T_i | ^{(t)}) P(u</em>{i} | ) $.\ \ We will use the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method. To tune the variance of the proposal distributions, we will first test the algorithm for a small number of iterations to achieve around 25% acceptance rate for optimal efficiency. We will use non-informative priors for all the parameters. \ \ For Bayesian methods: We will use Stan to perform sampling, where we will use No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).\ \ We will use normal prior distributions for <span class="math inline">\(\beta\)</span>…, and inverse Gamma prior distributions for the variance parameters. We will use the following prior distribution for the parameters for Bayesian methods:\ \ (1) $ N(0, 10^2)$.\ (2) $ N(0, 10^2)$.\ (3) <span class="math inline">\(\alpha \sim N(0, 10^2)\)</span>.\ (4) $_u (0.1, 0.1) $.\ (5) $_e (0.1, 0.1) $.\ \ We will use a constant baseline hazard function for simplicity.\ \ For machine learning methods: We plan to use random survival forest to check prediction accuracy, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.\</p>
+\end{align}\]</span> where <span class="math inline">\(l_i(\theta | Y_i, T_i) = \sum_{j=1}^{J_i} log P(Y_{ij}|\theta, u_i) + log[h_i(T_i)^{\delta_i}S_i(T_i)] + log P(u_i |\theta)\)</span>,</p>
+<p><span class="math inline">\(f(u_i | \theta^{(t)}, Y_i, T_i) \propto \prod_{j=1}^{j_i} P(Y_{ij} |u_i, \boldsymbol{\theta^{(t)}}) h_i(T_i | \theta^{(t)})^{\delta_i}S_i(T_i | \theta^{(t)}) P(u_{i} | \boldsymbol{ \theta^{(t)}})\)</span>.</p>
+<p>We will use the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method. To tune the variance of the proposal distributions, we will first test the algorithm for a small number of iterations to achieve around 25% acceptance rate for optimal efficiency. We will use non-informative priors for all the parameters.</p>
+<p>For Bayesian methods: We will use Stan to perform sampling, where we will use No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).</p>
+<p>We will use normal prior distributions for <span class="math inline">\(\beta\)</span>…, and inverse Gamma prior distributions for the variance parameters. We will use the following prior distribution for the parameters for Bayesian methods:</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(\beta \sim N(0, 10^2)\)</span>.</li>
+<li><span class="math inline">\(\gamma \sim N(0, 10^2)\)</span>.</li>
+<li><span class="math inline">\(\alpha \sim N(0, 10^2)\)</span>.</li>
+<li><span class="math inline">\(\sigma_u \sim \text{Inverse Gamma}(0.1, 0.1)\)</span>.</li>
+<li><span class="math inline">\(\sigma_e \sim \text{Inverse Gamma}(0.1, 0.1)\)</span>.</li>
+</ol>
+<p>We will use a constant baseline hazard function for simplicity.</p>
+<p>For machine learning methods: We plan to use random survival forest to check prediction accuracy, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.</p>
 <p>We will compare the model estimates, standard error, computation speed, and prediction accuracy. We will use cross-validation to check prediction accuracy.</p>
 </div>
 <div id="simulation" class="section level2">
 <h2>Simulation</h2>
-<p>We compare the model fitting results using the simulation set-up as follows:\ \ First, we simulate the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + u_i + _{ij} $, where <span class="math inline">\(u_i \sim N(0, 2), \epsilon_{ij} \sim N(0, 1)\)</span>. \ \ Second, we simulate N random uniform distribution, which corresponds to the survival probability. And we calculate the failure time as: <span class="math inline">\(h_i(T_i) = exp(-2) \exp(-1*w_i + 0.2*m_i(T_i))\)</span>, where $m_i(T_i) = 20 + (-1)*T_i + u_i $. And we can calculate the survival time using an explicit formula.\ \ We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as from the `aids’ data in the longitudinal model, and another 200 subjects as the testing dataset.</p>
+<p>We compare the model fitting results using the simulation set-up as follows:</p>
+<p>First, we simulate the longitudinal responses using the following formula: <span class="math inline">\(Y_{ij} = 20 + (-1)*t_{ij} + u_i + \epsilon_{ij}\)</span>, where <span class="math inline">\(u_i \sim N(0, 2), \epsilon_{ij} \sim N(0, 1)\)</span>.</p>
+<p>Second, we simulate N random uniform distribution, which corresponds to the survival probability. And we calculate the failure time as: <span class="math inline">\(h_i(T_i) = exp(-2) \exp(-1*w_i + 0.2*m_i(T_i))\)</span>, where <span class="math inline">\(m_i(T_i) = 20 + (-1)*T_i + u_i\)</span>. And we can calculate the survival time using an explicit formula.</p>
+<p>We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as from the `aids’ data in the longitudinal model, and another 200 subjects as the testing dataset.</p>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
@@ -442,7 +466,9 @@ Discussion<br />
 <h1>Future direction</h1>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. \ \ \ \ </p>
+<p>Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. </p>
+<p></p>
+<p></p>
 </div>
 </div>
 
