@@ -21,7 +21,7 @@ p = length(time)
 # xi ~ binom(1; 0.4).
 
 ### set up data frame
-dat = data.frame(subject=rep(1:n, times = p), time=rep(time,each=n))
+dat = data.frame(patient=rep(1:n, times = p), time=rep(time,each=n))
 #dat3 <- dat[order(dat$subject),]
 ui = as.vector(rnorm(n,0,2))
 eij = as.vector(rnorm(n*p,0,1))
@@ -47,3 +47,18 @@ dat_tmp$N = runif(n,0,1) #survival probability
 dat_tmp$mi_ti = 20 + (-1)*dat_tmp$Ti + (-4)*dat_tmp$xi + dat_tmp$ui
 dat_tmp$hi_ti = exp(-2)*exp(-1*dat_tmp$wi+0.2*dat_tmp$mi_ti) #actual failure time
 head(dat_tmp,10)
+
+#Simulate covariates as from aids dataset:
+# colnames(aids): "patient" "Time"    "death"   "CD4"     "obstime" "drug"    "gender"  "prevOI"  "AZT"     "start"   "stop"    "event"
+# Time = time to death or censoring (X = T^C where T is time to death)
+# nonbinary: "CD4"  = CD4 cell count  ;
+# "obstime" = time points at which CD4 cell counts were recorded;
+# "start"  and  "stop" are intervals of the obstime
+dat_cov = dat2
+dat_cov$death = rbinom(n, 1, 0.412) #death
+dat_cov$drug = rbinom(n, 1, 0.51) #ddC
+dat_cov$gender = rbinom(n, 1, 0.90) #male
+dat_cov$prevOI = rbinom(n, 1, 0.61) #AIDS
+dat_cov$AZT = rbinom(n, 1, 0.65) #intolerance
+dat_cov$event = rbinom(n, 1, 0.13 )
+head(dat_cov,10)
