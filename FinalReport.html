@@ -403,7 +403,7 @@ Discussion<br />
 <div id="methods" class="section level2">
 <h2>Methods</h2>
 <p>Joint modelling framework: <span class="math display">\[\begin{align}
-    Y_{ij} =&amp; m_i(t_{ij}) + \epsilon_{ij} 
+    Y_{ij} =&amp; m_i(t_{ij}) + \epsilon_{ij}\\ 
     h_i(T_i) =&amp; h_0\exp(\boldsymbol{w_i'}\boldsymbol{\gamma} + \alpha m_i(T_i))
 \end{align}\]</span> where <span class="math inline">\(m_i(t_{ij}) = \beta_0 + \beta_1 t_{ij} + \boldsymbol{x_{ij}}' \boldsymbol{\beta} + u_i\)</span> and <span class="math inline">\(m_i(T_i) = \beta_0 + \beta_1 T_{i} + x_i'\beta + u_i\)</span>.</p>
 <p>We have $ i=1,2, , n$ subjects, <span class="math inline">\(j = 1, 2,\dots, J_i\)</span> visits for each subject. We observe the longitudinal outcome <span class="math inline">\(Y_{ij}\)</span> for subject i at visit j, and we observe the patient’s covariate <span class="math inline">\(\boldsymbol{x_{ij}}\)</span> at time <span class="math inline">\(t_{ij}\)</span>. We also observe the event time <span class="math inline">\(T_i = \text{min}(T_i^*, C_i)\)</span>, where <span class="math inline">\(T_i^*\)</span> is the actual failure time, and $C_i $ is the censoring time. We also observe the censoring indicator <span class="math inline">\(\delta_i = I(T_i^*\leq C_i)\)</span>, and drug type $ $.</p>
@@ -423,7 +423,7 @@ Discussion<br />
     P(u_{i'} | Y_{i'}^{(T)}, T_{i'}&gt;T, \boldsymbol{\hat \theta}) \propto \prod_{j=1}^{j_{i'}} P(Y_{i'j} |u_i', \boldsymbol{\hat \theta}) P(T_{i'}&gt;T | u_{i'}, \boldsymbol{\hat \theta}) P(u_{i'} | \boldsymbol{\hat \theta})
 \end{align}\]</span> We sample from the above distribution, using sampling methods from module 2.</p>
 <p>Suppose we have D samples of <span class="math inline">\(u_{i'}\)</span>, we can then predict his longitudinal outcomes at time <span class="math inline">\(T'\)</span>, and his conditional survival probability at time <span class="math inline">\(T'\)</span> as: <span class="math display">\[\begin{align}
-    m_{i'}(T') =&amp; \hat \beta_0 + \hat \beta_1 T' + \boldsymbol{x_{i'j}'} \boldsymbol{\hat \beta} + u_{i'}^{(d)}  
+    m_{i'}(T') =&amp; \hat \beta_0 + \hat \beta_1 T' + \boldsymbol{x_{i'j}'} \boldsymbol{\hat \beta} + u_{i'}^{(d)}\\
     P(T_{i'}&gt;T' | T_{i'}&gt;T) =&amp; S_{i'}(T' |  \boldsymbol{\hat \theta}, u_{i'}^{(d)})/S_{i'}(T  | \boldsymbol{\hat \theta}, u_{i'}^{(d)})
 \end{align}\]</span></p>
 <p>We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy.</p>
@@ -431,7 +431,7 @@ Discussion<br />
 <p>We propose to use EM algorithm, Bayesian methods, and machine learning methods to estimate parameters.</p>
 <p>For EM algorithm: Suppose we have the parameter estimate at iteration <span class="math inline">\(t\)</span>. We can sample the random effect <span class="math inline">\(u_i\)</span> from the posterior distribution of <span class="math inline">\(u_i\)</span>, and do the maximization step.</p>
 <p>We propose the Q-function as: <span class="math display">\[\begin{align}
-    Q(Y|\theta^{(t)}) =&amp; E(l_c(\theta^{(t)}|Y, T))  
+    Q(Y|\theta^{(t)}) =&amp; E(l_c(\theta^{(t)}|Y, T))\\ 
     =&amp; \sum_{i=1}^n \int l_i(\theta | Y_i, T_i) f(u_i | \theta^{(t)}, Y_i, T_i) du
 \end{align}\]</span> where <span class="math inline">\(l_i(\theta | Y_i, T_i) = \sum_{j=1}^{J_i} log P(Y_{ij}|\theta, u_i) + log[h_i(T_i)^{\delta_i}S_i(T_i)] + log P(u_i |\theta)\)</span>,</p>
 <p><span class="math inline">\(f(u_i | \theta^{(t)}, Y_i, T_i) \propto \prod_{j=1}^{j_i} P(Y_{ij} |u_i, \boldsymbol{\theta^{(t)}}) h_i(T_i | \theta^{(t)})^{\delta_i}S_i(T_i | \theta^{(t)}) P(u_{i} | \boldsymbol{ \theta^{(t)}})\)</span>.</p>
