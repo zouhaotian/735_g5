@@ -54,11 +54,11 @@ head(dat_tmp,10)
 # nonbinary: "CD4"  = CD4 cell count  ;
 # "obstime" = time points at which CD4 cell counts were recorded;
 # "start"  and  "stop" are intervals of the obstime
-dat_cov = dat2
+dat_cov = dat2[,-c(3:5)]
 dat_cov$death = rbinom(n, 1, 0.412) #death
-dat_cov$drug = rbinom(n, 1, 0.51) #ddC
+dat_cov$drug = rbinom(n, 1, 0.49) #ddI
 dat_cov$gender = rbinom(n, 1, 0.90) #male
 dat_cov$prevOI = rbinom(n, 1, 0.61) #AIDS
-dat_cov$AZT = rbinom(n, 1, 0.65) #intolerance
-dat_cov$event = rbinom(n, 1, 0.13 )
+dat_cov$AZT = rbinom(n, 1, 1-0.65) #not intolerance
+dat_cov$event = rbinom(n, 1, 0.13 ) #event
 head(dat_cov,10)
