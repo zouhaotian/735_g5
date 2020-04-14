@@ -1,6 +1,9 @@
+library(tidyverse)
 library(knitr)
 library(devtools)
 load_all('jm5')
+
+## MCEM and Bayesian pre-processing 
 
 l.formula <- CD4 ~ obstime + drug + prevOI + AZT
 s.formula <- Surv(Time, death) ~ drug
@@ -9,12 +12,19 @@ l <- jm_filter(l.formula, s.formula, dat, dat$patient)
 long.dat <- l[[1]]
 surv.dat <- l[[2]]
 
+## RSF pre-processing
+nearestCD4 = long.dat %>%
+  select(ID, obstime, CD4, drugddI) %>%
+  group_by(ID) %>%
+  filter(obstime==max(obstime)) %>%
+  select(ID, CD4)
+
+surv.dat2 = merge(surv.dat, nearestCD4, by="ID")
+
 ## summary statistics (need to edit)
 
 
-##
-
-## Model fit
+## Model fit: MCEM; Bayesian;
 
 l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
 s.formula2 <- Surv(Time, death) ~ drugddI
@@ -27,8 +37,14 @@ summary.mean <- summary(fit.result)$summary[, 1]
 summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
 summary.mean
 
-##
+## model fit: RSF
+s.formula2 <- Surv(Time, death) ~ drugddI + CD4
+fit = RandomSurvivalForest(surv.dat2, s.formula2)
 
+head(fit$predicted) ## predicted value for each patient
+head(fit$survival[, 1:10]) ## In-bag survival function
+plot.survival(fit) ## generates Survival plots
+##
 
 ## Cross-validation to estimate accuracy of MCEM and Bayesian method
 cv.dat <- create_cv(long.dat, surv.dat)
@@ -73,5 +89,14 @@ for (i in 1:length(cv.dat)){
 mcem.auc.bs.mean/length(cv.dat)
 stan.auc.bs.mean/length(cv.dat)
 
-## Simulation setting
+## Cross-validation: RSF
+cv.dat <- create_cv(long.dat, surv.dat)
+surv.train2 = left_join(cv.dat[[2]]$surv.train, nearestCD4, by="ID")
+surv.test2 = left_join(cv.dat[[2]]$surv.test, nearestCD4, by="ID")
+
+fit = RandomSurvivalForest(surv.train2, s.formula2)
+res = predict(fit, newdata = surv.test2)
+res$err.rate[!is.na(res$err.rate)] ## prediction error rate
+
+## Simulation
 sim.dat <- SimulateDataset(seed = 1)
