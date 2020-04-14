@@ -23,11 +23,18 @@ p = length(time)
 ### set up data frame
 dat = data.frame(patient=rep(1:N, times = p), time=rep(time,each=N))
 #dat3 <- dat[order(dat$subject),]
+<<<<<<< HEAD
 ui = as.vector(rnorm(N,0,2))
 eij = as.vector(rnorm(N*p,0,1))
 xi = as.vector(rbinom(N, 1, 0.4))
 drug = as.vector(rbinom(N, 1, 0.49)) #ddI #this is wi
 dat1 = cbind(dat,rep(xi,p),rep(ui,p),eij,rep(drug,p))
+=======
+ui = as.vector(rnorm(n,0,2))
+eij = as.vector(rnorm(n*p,0,1))
+xi = as.vector(rbinom(n, 1, 0.4))
+dat1 = cbind(dat,rep(xi,p),rep(ui,p),eij)
+>>>>>>> 713d31f6bc7bfa5c2bc43f57645e6d76af861fca
 dat2 = dat1[order(dat1$patient,dat1$time),]
 colnames(dat2)[3] = "xi"
 colnames(dat2)[4] = "ui"
