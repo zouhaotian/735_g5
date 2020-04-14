@@ -20,6 +20,7 @@ check_exist <- function(variable){
 #' @param n.iter total number of iterations in NUTS (default = 2000)
 #' @param n.burnin number of burnins in NUTS (default = n.iter/2)
 #' @param seed random seed (default = 123)
+#' @param progress whether to show progress in sampling (default = TRUE)
 #' 
 #' @return a Stan fit object
 #'  
@@ -37,7 +38,8 @@ check_exist <- function(variable){
 fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
                      n.iter = 2000, 
                      n.burnin = floor(n.iter/2),
-                     seed = 123){
+                     seed = 123,
+                     progress = TRUE){
   options(mc.cores = parallel::detectCores())
   rstan_options(auto_write = TRUE)
   
@@ -176,6 +178,6 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
   md = stan_model(model_code = model_code)
   fitStan <- sampling(md, data = stanDat, pars = pars, init = inits,
                       chains = 4, iter = n.iter, warmup = n.burnin,
-                      seed = seed)
+                      seed = seed, open_progress = progress)
   return(fitStan)
 }

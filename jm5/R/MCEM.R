@@ -74,6 +74,7 @@ tolerance <- function(theta.1, theta.2){
 #' @param max.iter maximum iterations allowed (default = 30)
 #' @param tol tolerance (default = 1e-3)
 #' @param seed random seed (default = 123)
+#' @param progress whether to show progress for each iteration (default = TRUE)
 #' 
 #' @return a list of estimated parameters
 #'  
@@ -89,7 +90,7 @@ tolerance <- function(theta.1, theta.2){
 #' @export
 
 MCEM <- function(l.formula, s.formula, long.dat, surv.dat, 
-                 max.iter = 30, tol = 1e-3, seed = 123){
+                 max.iter = 30, tol = 1e-3, seed = 123, progress = TRUE){
   
   set.seed(seed)
   ## Check existence of variable
@@ -267,8 +268,10 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
 
     ## Calculate tolerance
     curr.tol <- tolerance(theta, theta.old)
-    cat(sprintf('Iter:%d curr.tol:%.6f\n', iter, curr.tol))
-    if (iter==max.iter & curr.tol>tol){
+    if (progress==TRUE){
+      cat(sprintf('Iter:%d curr.tol:%.6f\n', iter, curr.tol)) 
+    }
+    if (iter==max.iter){
       warning('Iteration reached maximum without convergence!')
     }
   }

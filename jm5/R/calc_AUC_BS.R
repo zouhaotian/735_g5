@@ -55,7 +55,7 @@ MH.rw2 <- function(yi, ti, xi, Ti, di, wi, sigma_u, sigma_e, alpha, fixed.eff, M
 #' @param summary.mean estimated parameters value (mean)
 #' @param seed random seed (default = 123)
 #' 
-#' @return a Stan fit object
+#' @return a length-2 vector: estimated AUC and BS
 #'  
 #' 
 #' @importFrom survival Surv

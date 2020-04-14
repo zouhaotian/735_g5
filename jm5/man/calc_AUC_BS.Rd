@@ -33,7 +33,7 @@ calc_AUC_BS(
 \item{surv.dat}{the survival test set}
 }
 \value{
-a Stan fit object
+a length-2 vector: estimated AUC and BS
 }
 \description{
 This function allows you to pass in longitudinal and survival

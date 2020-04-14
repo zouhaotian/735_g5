@@ -5,13 +5,13 @@
 # as from the `aids' data in the longitudinal model, 
 # and another 200 subjects as the testing dataset.
 
-SimulateDataset = function(seed, num){
+SimulateDataset = function(n.train = 500, n.test = 200, seed){
   
   #Set Seed
   set.seed(seed)
   
   #number of individuals
-  N = 700 #TOTAL; split into N_train = 500 and N_test = 200 later;
+  N = n.train+n.test #TOTAL; split into N_train = 500 and N_test = 200 later;
   
   #number of observations
   time = c(0, 2, 6, 12, 18)
@@ -28,7 +28,7 @@ SimulateDataset = function(seed, num){
   ui = as.vector(rnorm(N,0,2))
   eij = as.vector(rnorm(N*p,0,1))
   xi = as.vector(rbinom(N, 1, 0.4))
-  drug = as.vector(rbinom(N, 1, 0.49)) #ddI = 1 #this is wi
+  drug = as.vector(rbinom(N, 1, 0.5)) #ddI = 1 #this is wi
   dat1 = cbind(dat,rep(xi,p),rep(ui,p),eij,rep(drug,p))
   dat2 = dat1[order(dat1$patient,dat1$time),]
   colnames(dat2)[3] = "xi"
@@ -72,30 +72,34 @@ SimulateDataset = function(seed, num){
   #death_rate #0.42
   
   surv.dat.sim = cbind(dat3[,-c(2,5,7)], Ti_star, Ci, Ti, delta_i)
+  surv.dat <- data.frame(Time = surv.dat.sim$Ti, 
+                         death = surv.dat.sim$delta_i,
+                         w = surv.dat.sim$drug,
+                         ID = surv.dat.sim$patient)
+  
   #head(surv.dat.sim, 10) #This is our simulated survival dataset
-  assign(paste("surv.dat.sim", num, sep=""),surv.dat.sim)
+  #assign(paste("surv.dat.sim", num, sep=""),surv.dat.sim)
   
   #longitudinal
   Ti = as.vector(Ti)
   dat4 = cbind(dat2, rep(Ti,each = p))
   colnames(dat4)[8] = "Ti"
-  long.dat.sim<-dat4[!(dat4$Ti < dat4$time),]
+  long.dat.sim <- dat4[!(dat4$Ti < dat4$time),]
+  long.dat <- data.frame(Y = long.dat.sim$Yij, 
+                         obstime = long.dat.sim$time,
+                         x = long.dat.sim$xi, 
+                         ID = long.dat.sim$patient)
   #head(long.dat.sim,10)  #This is our corresponding simulated longitudinal dataset
   #View(long.dat.sim)
-  assign(paste("long.dat.sim", num, sep=""),long.dat.sim)
+  #assign(paste("long.dat.sim", num, sep=""),long.dat.sim)
   
   #datasets_final = list(noquote(paste0("long.dat.sim", num)) = long.dat.sim, noquote(paste0("surv.dat.sim", num)) = surv.dat.sim)
   
-  datasets_final = list(Longitudinal = long.dat.sim, Survival= surv.dat.sim)
+  datasets_final = list(
+    long.train = long.dat[long.dat$ID %in% (1:n.train), ], 
+    long.test = long.dat[-long.dat$ID %in% (1:n.train), ],
+    surv.train = surv.dat[surv.dat$ID %in% (1:n.train), ],
+    surv.test = surv.dat[-surv.dat$ID %in% (1:n.train), ])
   return(datasets_final)
 }
 
-SimulateDataset(20201, 1)
-SimulateDataset(20202, 2)
-SimulateDataset(20203, 3)
-SimulateDataset(20204, 4)
-#etc
-
-#500 training
-#200 testing
-#Look at create_cv.R for how to split (JM5 package)

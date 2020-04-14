@@ -11,7 +11,8 @@ fit_stan(
   surv.dat,
   n.iter = 2000,
   n.burnin = floor(n.iter/2),
-  seed = 123
+  seed = 123,
+  progress = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ fit_stan(
 \item{n.burnin}{number of burnins in NUTS (default = n.iter/2)}
 
 \item{seed}{random seed (default = 123)}
+
+\item{progress}{whether to show progress in sampling (default = TRUE)}
 }
 \value{
 a Stan fit object

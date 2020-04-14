@@ -11,16 +11,26 @@ surv.dat <- l[[2]]
 
 ## summary statistics (need to edit)
 
+
+##
+
+## Model fit
+
 l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
 s.formula2 <- Surv(Time, death) ~ drugddI
 
 mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
+mcem.result
 
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
 summary.mean <- summary(fit.result)$summary[, 1]
 summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
+summary.mean
 
-#save.image('1.RData')
+##
+
+
+## Cross-validation to estimate accuracy of MCEM and Bayesian method
 cv.dat <- create_cv(long.dat, surv.dat)
 st <- c(2, 4, 6) ## starting time
 dt <- c(0.5, 1) ## prediction time window
@@ -62,3 +72,6 @@ for (i in 1:length(cv.dat)){
 
 mcem.auc.bs.mean/length(cv.dat)
 stan.auc.bs.mean/length(cv.dat)
+
+## Simulation setting
+sim.dat <- SimulateDataset(seed = 1)

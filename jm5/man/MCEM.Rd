@@ -11,7 +11,8 @@ MCEM(
   surv.dat,
   max.iter = 30,
   tol = 0.001,
-  seed = 123
+  seed = 123,
+  progress = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ MCEM(
 \item{tol}{tolerance (default = 1e-3)}
 
 \item{seed}{random seed (default = 123)}
+
+\item{progress}{whether to show progress for each iteration (default = TRUE)}
 }
 \value{
 a list of estimated parameters
