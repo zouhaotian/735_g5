@@ -1,0 +1,209 @@
+---
+title: "BIOS735 Final Report"
+author: "Group 5"
+date: "4/27/2020"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Results 
+
+### Load our package `jm5` and separate AIDS dataset to longitudinal dataset and survival dataset
+
+```{r include=FALSE}
+library(knitr)
+library(devtools)
+library(tidyverse)
+library(JM)
+load_all('jm5')
+```
+
+Define our longitudinal formula and survival formula, and separate datasets
+
+```{r}
+l.formula <- CD4 ~ obstime + drug + prevOI + AZT
+s.formula <- Surv(Time, death) ~ drug
+dat <- JM::aids
+l <- jm_filter(l.formula, s.formula, dat, ID = dat$patient)
+long.dat <- l[[1]]
+surv.dat <- l[[2]]
+```
+
+Head of longitudinal dataset and survival dataset
+```{r}
+head(long.dat)
+head(surv.dat)
+```
+
+### Summary statistics for AIDS dataset
+
+```{r echo=FALSE}
+va = c("ID", "Time", "death", "CD4", "obstime", "drug", "prevOI", "AZT", "gender")
+desc = c("Patients identifier (1-467)",
+         "The time to death or censoring",
+         "0 for censoring, 1 for death",
+         "The CD4 cells count",
+         "The time points at which the CD4 cells count was recorded (0, 2, 6, 12, 18)",
+         "ddI (1) for didanosine, ddC (0) for zalcitabine",
+         "AIDS (1) for previous opportunistic infection, noAIDS (0) for no previous infection",
+         "failure (1) for AZT failure, intolerance (0) for AZT intolerance",
+         "1 for male, 0 for female"
+         )
+summary_stat = data.frame(Variable = va, Description = desc)
+kable(summary_stat)
+```
+
+```{r echo=FALSE, out.width='50%'}
+summ = aids[,c(1,3:9)] %>%
+  spread(key = obstime, value = CD4)
+summ = summ[,2:6]
+summ$drug = ifelse(summ$drug == "ddI", 1, 0)
+summ$gender = ifelse(summ$gender == "male", 1, 0)
+summ$prevOI = ifelse(summ$prevOI == "AIDS", 1, 0)
+summ$AZT = ifelse(summ$AZT == "failure", 1, 0)
+summ = gather(summ, death, drug, gender, prevOI, AZT,
+              key = "variables", value = "count")
+ggplot(summ, aes(variables)) +
+  geom_bar(aes(fill = as.factor(count))) +
+  theme_light() +
+  labs(x = "Variable",
+       y = "Count",
+       title = "Summary plot for dichotomous variables") +
+  scale_fill_discrete(name = NULL,
+                      labels = c("intolerance/censoring/ddC/female/noAIDS",
+                                 "failure/death/ddI/male/AIDS")) +
+  theme(legend.position="top")
+
+ggplot(surv.dat, aes(x = as.factor(ifelse(death == 0, "Censoring", "Death")), y = Time, fill = as.factor(drugddI))) +
+  geom_boxplot() +
+  labs(x = c("Status"),
+       y = "Time to death or censoring",
+       title = "Summary plot for survival part") +
+  scale_fill_discrete(name = "drug",
+                      labels = c("ddC","ddI")) +
+  theme_light() +
+  theme(legend.position="top")
+```
+
+```{r echo=FALSE, out.width='33.33%'}
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(prevOIAIDS))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "prevOI",
+                       labels = c("AIDS", "noAIDS")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by prevOI)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(drugddI))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "drug",
+                       labels = c("ddC", "ddI")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by drug)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(AZTfailure))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "AZT",
+                       labels = c("intolerance", "failure")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by AZT)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+```
+
+### Model fit for AIDS dataset - MCEM algorithm
+
+```{r eval=FALSE, include=FALSE}
+l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
+s.formula2 <- Surv(Time, death) ~ drugddI
+
+mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
+mcem.result
+```
+
+### Model fit for AIDS dataset - Bayesian method
+
+```{r eval=FALSE, include=FALSE}
+fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
+summary.mean <- summary(fit.result)$summary[, 1]
+summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
+summary.mean
+```
+
+### Cross-validation: AUC and BS for AIDS dataset (MCEM, Bayesian)
+
+```{r eval=FALSE, include=FALSE}
+cv.dat <- create_cv(long.dat, surv.dat)
+st <- c(2, 4, 6) ## starting time
+dt <- c(0.5, 1) ## prediction time window
+mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+for (i in 1:length(cv.dat)){
+  ## training data and testing data
+  long.train <- cv.dat[[i]][[1]]
+  long.test <- cv.dat[[i]][[2]]
+  surv.train <- cv.dat[[i]][[3]]
+  surv.test <- cv.dat[[i]][[4]]
+  
+  ## run MCEM and Stan on training dataset
+  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = FALSE)
+  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = FALSE)
+  stan.train.mean <- summary(stan.train)$summary[, 1]
+  stan.train.mean <- stan.train.mean[-length(stan.train.mean)]
+  
+  ## Calculate AUC and BS ##
+  mcem.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  stan.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  index <- 0
+  for (Tstart in st){
+    for (Tdelta in dt){
+      index <- index + 1
+      mcem.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
+                                          long.test, surv.test,
+                                          Tstart, Tstart+Tdelta, 
+                                          mcem.train.mean)
+      stan.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
+                                          long.test, surv.test,
+                                          Tstart, Tstart+Tdelta, 
+                                          stan.train.mean)
+    }
+  }
+  mcem.auc.bs.mean <- mcem.auc.bs.mean + mcem.auc.bs
+  stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
+}
+
+mcem.auc.bs.mean/length(cv.dat)
+stan.auc.bs.mean/length(cv.dat)
+```
+
+### Simulation: evaluate correctness of MCEM and Bayesian methods
+
+```{r}
+
+```
+
+### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
+
+```{r}
+
+```
+
+### Simulation: estimated AUC, true AUC and estimated BS (RSF)
+
+```{r}
+
+```
