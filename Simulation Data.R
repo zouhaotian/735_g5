@@ -91,6 +91,10 @@ SimulateDataset = function(seed, num){
 }
 
 SimulateDataset(20201, 1)
+SimulateDataset(20202, 2)
+SimulateDataset(20203, 3)
+SimulateDataset(20204, 4)
+#etc
 
 #500 training
 #200 testing
