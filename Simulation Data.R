@@ -9,7 +9,7 @@
 set.seed(2020)
 
 #number of individuals
-n = 500
+N = 700
 
 #number of observations
 time = c(0, 2, 6, 12, 18)
@@ -21,28 +21,40 @@ p = length(time)
 # xi ~ binom(1; 0.4).
 
 ### set up data frame
-dat = data.frame(patient=rep(1:n, times = p), time=rep(time,each=n))
+dat = data.frame(patient=rep(1:N, times = p), time=rep(time,each=N))
 #dat3 <- dat[order(dat$subject),]
-ui = as.vector(rnorm(n,0,2))
-eij = as.vector(rnorm(n*p,0,1))
-xi = as.vector(rbinom(n, 1, 0.4))
-dat1 = cbind(dat,rep(xi,p),rep(ui,p),eij)
-dat2 = dat1[order(dat1$subject,dat1$time),]
+ui = as.vector(rnorm(N,0,2))
+eij = as.vector(rnorm(N*p,0,1))
+xi = as.vector(rbinom(N, 1, 0.4))
+drug = as.vector(rbinom(N, 1, 0.49)) #ddI #this is wi
+dat1 = cbind(dat,rep(xi,p),rep(ui,p),eij,rep(drug,p))
+dat2 = dat1[order(dat1$patient,dat1$time),]
 colnames(dat2)[3] = "xi"
 colnames(dat2)[4] = "ui"
+colnames(dat2)[6] = "drug"
 dat2$Yij = 20-1*dat2$time -4*dat2$xi + dat2$ui + dat2$eij
-head(dat2)
+head(dat2,8)
 
 # Second, we simulate N random uniform distribution, which corresponds to the survival probability. 
-# We calculate the failure time as: hi(Ti) = exp(-2) exp(-1*wi + 0:2 *mi(Ti)), 
+# We calculate the failure time as: hi(Ti) = exp(-2) exp(-1*wi + 0.2 *mi(Ti)), 
 # where mi(Ti) = 20 + (-1) * Ti + (-4) * xi + ui.
 # And we can calculate the survival time using an explicit formula.
+
+dat3 = dat2
+dat3$N = runif(N) #survival probability (random uniform distribution)
+mi_ti = 20 + (-1)*T_i + (-4)*xi + ui
+hi_ti = exp(-2)*exp(-1*drug + 0.2*mi_ti))
+head(dat3)
+
+
+
+
 
 dat_tmp = dat2[ which(dat2$time==0), ]
 dat_tmp$time <- NULL
 dat_tmp$eij <- NULL
 dat_tmp$Yij <- NULL
-dat_tmp$N = runif(n,0,1) #survival probability
+dat_tmp$N = runif(N,0,1) #survival probability
 #define Ti and wi
 dat_tmp$mi_ti = 20 + (-1)*dat_tmp$Ti + (-4)*dat_tmp$xi + dat_tmp$ui
 dat_tmp$hi_ti = exp(-2)*exp(-1*dat_tmp$wi+0.2*dat_tmp$mi_ti) #actual failure time
@@ -55,10 +67,10 @@ head(dat_tmp,10)
 # "obstime" = time points at which CD4 cell counts were recorded;
 # "start"  and  "stop" are intervals of the obstime
 dat_cov = dat2[,-c(3:5)]
-dat_cov$death = rbinom(n, 1, 0.412) #death
-dat_cov$drug = rbinom(n, 1, 0.49) #ddI
-dat_cov$gender = rbinom(n, 1, 0.90) #male
-dat_cov$prevOI = rbinom(n, 1, 0.61) #AIDS
-dat_cov$AZT = rbinom(n, 1, 1-0.65) #not intolerance
-dat_cov$event = rbinom(n, 1, 0.13 ) #event
+dat_cov$death = rbinom(N, 1, 0.412) #death
+dat_cov$drug = rbinom(N, 1, 0.49) #ddI
+dat_cov$gender = rbinom(N, 1, 0.90) #male
+dat_cov$prevOI = rbinom(N, 1, 0.61) #AIDS
+dat_cov$AZT = rbinom(N, 1, 1-0.65) #not intolerance
+dat_cov$event = rbinom(N, 1, 0.13 ) #event
 head(dat_cov,10)
