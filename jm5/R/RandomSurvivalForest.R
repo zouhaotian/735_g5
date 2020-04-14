@@ -14,8 +14,10 @@
 #' @importFrom randomForestSRC rfsrc
 #' 
 #' @export
-RandomSurvivalForest = function(surv.dat2, s.formula2, ntree=100,seed=12,...)  {
+RandomSurvivalForest = function(surv.dat, s.formula, ntree=100,seed=12,...)  {
+  # set seed
   set.seed(seed)
-  fit = rfsrc(s.formula2, data = surv.dat2, ntree = ntree,statistics=T, bootstrap = "none", ...)
+  
+  fit = rfsrc(s.formula, data = surv.dat, ntree = ntree,statistics=T, ...)
   return(fit)
 }
