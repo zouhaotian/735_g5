@@ -1,6 +1,6 @@
 ---
 title: "BIOS735 Final Report"
-author: "Group 5"
+author: "Group 5: Ji-Eun Park, Yueqi Shen, Jianqiao Wang, Yangjianchen Xu, Christina Zhou, Haotian Zou"
 date: "4/27/2020"
 output:
   html_document:
@@ -319,8 +319,6 @@ stan.auc.bs.mean/length(cv.dat)
 ```{r}
 
 ```
-
-
 
 # Discussion
 
