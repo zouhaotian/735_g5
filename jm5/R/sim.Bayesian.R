@@ -51,12 +51,12 @@ sim.Bayesian = function(sim.num = 10,
   
   for (i in 1:sim.num) {
     dat.sim = SimulateDataset(seed = i)
-    sim.Bayesian = fit_stan(l.formula.sim, s.formula.sim, dat.sim$long.train, dat.sim$surv.train,
+    fit.Bayesian = fit_stan(l.formula.sim, s.formula.sim, dat.sim$long.train, dat.sim$surv.train,
                             n.iter = n.iter, 
                             n.burnin = n.burnin,
                             seed = seed,
                             progress = FALSE)
-    result.sim = as.data.frame(sim.Bayesian)
+    result.sim = as.data.frame(fit.Bayesian)
     est = get.estimate(result.sim)[1:length(true_value),]
     estimate[,i] = est$Estimate
     SE[,i] = est$StdErr

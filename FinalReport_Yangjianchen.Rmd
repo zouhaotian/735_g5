@@ -36,12 +36,6 @@ long.dat <- l[[1]]
 surv.dat <- l[[2]]
 ```
 
-Head of longitudinal dataset and survival dataset
-```{r}
-head(long.dat)
-head(surv.dat)
-```
-
 ### Summary statistics for AIDS dataset
 
 ```{r echo=FALSE}
@@ -125,28 +119,18 @@ ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.fa
   theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
 ```
 
-### Model fit for AIDS dataset - MCEM algorithm
-
-```{r eval=FALSE, include=FALSE}
-l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
-s.formula2 <- Surv(Time, death) ~ drugddI
-
-mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
-mcem.result
-```
-
 ### Simulation: evaluate correctness of MCEM and Bayesian methods
-
+```{r include=FALSE}
+## Simulation for MCEM
+simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10)
+```
 ```{r include=FALSE}
 ## Simulation for Bayesian method
 simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```
-```{r echo=FALSE}
-kable(simulation.Bayesian)
-```
-
-### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
-
 ```{r}
-
+kable(simulation.MCEM, caption = "Simulation results of MCEM method")
+```
+```{r}
+kable(simulation.Bayesian, caption = "Simulation results of Bayesian method")
 ```
