@@ -179,14 +179,18 @@ In order to ensure our methods are correct, we simulated data to test our packag
 
 First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18)$. 
 
-Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used this relation between $S(T_i)$ and the hazard to calculate the survival time. The failure time is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the AIDS dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
+Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used this relation between $S(T_i)$ and the hazard to calculate the survival time. The failure time is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `AIDS` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
 
 $$
-S_i(t) = \exp(-\int_0^t h_i(t) dt) = \exp\{-h_0\exp[w_i \gamma + \alpha(\beta_0 + \beta_2*x_i + u_i)] [\exp(\alpha \beta_1 t) - 1]/(\alpha \beta_1)\}
+S_i(t) = \exp(-\int_0^t h_i(t) dt) = \exp\{-h_0\exp[w_i \gamma + \alpha(\beta_0 + \beta_2x_i + u_i)] \frac{\exp(\alpha \beta_1 t) - 1}{(\alpha \beta_1)}
 $$
 Thus, we see that $T_i^* =\frac{1}{\alpha\beta_1}log[1-\frac{\alpha\beta_1\log(S_i(t))}{h_0\exp(\gamma w_i+\alpha(\beta_0+\beta_2x_i+u_i))}]$, where $\alpha = -0.2, \beta_0 = 20,\beta_1 = -1,\beta_2 = -4,\gamma = -1, h_0 = \exp(-2)$.
 
-We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as similar as the `aids` data in the longitudinal model, and another 200 subjects as the testing dataset.
+In order to obtain a death rate close to that of the `AIDS` dataset ($40.25\%$), we simulated the censoring indicator for each individual from a random Uniform distribution, $C_i \sim Unif(0,27)$. We define the time to event as $T_i = min(T_i^*, C_i)$. Finally, we define our death indicator as $\delta_i = I(T_i^* \le C_i)$. 
+
+For each simulation, we produce two sets of joint data: one longitudinal dataset and one survival dataset. The survival dataset consists of one row per subject with variables time to event, death indicator, and treatment group (drug). The longitudinal dataset consists of multiple observations per subject with variables response, observed time, and covariates. Subjects do not have observation times beyond the event time.
+
+For cross validation, we simulated N=500 subjects for the training dataset and another 200 subjects for the testing dataset.
 
 # Results 
 

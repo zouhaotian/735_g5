@@ -65,7 +65,7 @@ SimulateDataset = function(n.train = 500, n.test = 200, seed){
   # Event time T_i = min(T_i^*, C_i)
   # Delta_i = I(T_i^*<=C_i)
   #mi_ti = 20 + (-1)*dat3$T_i + (-4)*dat3$xi + dat3$ui
-  #hi_ti = exp(-2)*exp(-1*dat3$drug + 0.2*mi_ti) #hazard function for subject i 
+  #hi_ti = exp(-2)*exp(-1*dat3$drug - 0.2*mi_ti) #hazard function for subject i 
   
   S_t = runif(N) #survival probability (random uniform distribution)
   alpha = -0.2
