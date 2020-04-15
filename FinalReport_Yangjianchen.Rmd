@@ -135,74 +135,17 @@ mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
 mcem.result
 ```
 
-### Model fit for AIDS dataset - Bayesian method
-
-```{r eval=FALSE, include=FALSE}
-fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
-summary.mean <- summary(fit.result)$summary[, 1]
-summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
-summary.mean
-```
-
-### Cross-validation: AUC and BS for AIDS dataset (MCEM, Bayesian)
-
-```{r eval=FALSE, include=FALSE}
-cv.dat <- create_cv(long.dat, surv.dat)
-st <- c(2, 4, 6) ## starting time
-dt <- c(0.5, 1) ## prediction time window
-mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
-stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
-for (i in 1:length(cv.dat)){
-  ## training data and testing data
-  long.train <- cv.dat[[i]][[1]]
-  long.test <- cv.dat[[i]][[2]]
-  surv.train <- cv.dat[[i]][[3]]
-  surv.test <- cv.dat[[i]][[4]]
-  
-  ## run MCEM and Stan on training dataset
-  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = FALSE)
-  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = FALSE)
-  stan.train.mean <- summary(stan.train)$summary[, 1]
-  stan.train.mean <- stan.train.mean[-length(stan.train.mean)]
-  
-  ## Calculate AUC and BS ##
-  mcem.auc.bs <- matrix(NA, length(st)*length(dt), 2)
-  stan.auc.bs <- matrix(NA, length(st)*length(dt), 2)
-  index <- 0
-  for (Tstart in st){
-    for (Tdelta in dt){
-      index <- index + 1
-      mcem.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
-                                          long.test, surv.test,
-                                          Tstart, Tstart+Tdelta, 
-                                          mcem.train.mean)
-      stan.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
-                                          long.test, surv.test,
-                                          Tstart, Tstart+Tdelta, 
-                                          stan.train.mean)
-    }
-  }
-  mcem.auc.bs.mean <- mcem.auc.bs.mean + mcem.auc.bs
-  stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
-}
-
-mcem.auc.bs.mean/length(cv.dat)
-stan.auc.bs.mean/length(cv.dat)
-```
-
 ### Simulation: evaluate correctness of MCEM and Bayesian methods
 
-```{r}
-
+```{r include=FALSE}
+## Simulation for Bayesian method
+simulation.Bayesian = sim.Bayesian(sim.num = 10)
+```
+```{r echo=FALSE}
+kable(simulation.Bayesian)
 ```
 
 ### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
-
-```{r}
-
-```
-
-### Simulation: estimated AUC, true AUC and estimated BS (RSF)
 
 ```{r}
 
