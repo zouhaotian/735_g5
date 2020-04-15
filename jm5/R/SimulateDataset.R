@@ -73,7 +73,7 @@ SimulateDataset = function(n.train = 500, n.test = 200, seed){
   beta1 = -1
   beta2 = -4
   gamma = -1
-  h0 = exp(-1)
+  h0 = exp(-2)
   wi = dat3$drug
   Ti_star = log(1+(alpha*beta1*log(S_t)/(-h0*exp(gamma*wi+alpha*(beta0+beta2*xi+ui)))))/(alpha*beta1)
   #We want to death rate as 40.25% --> try different values of c and see which c makes the death rate close to 40.25%.
