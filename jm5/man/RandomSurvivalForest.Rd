@@ -4,16 +4,16 @@
 \alias{RandomSurvivalForest}
 \title{Fitting survival model using Random Survival Forest}
 \usage{
-RandomSurvivalForest(surv.dat2, s.formula2, ntree = 100, seed = 12, ...)
+RandomSurvivalForest(surv.dat, s.formula, ntree = 100, seed = 12, ...)
 }
 \arguments{
-\item{surv.dat2}{the survival dataset}
+\item{s.formula}{the formula for survival model}
 
 \item{ntree}{number of trees (default = 100)}
 
 \item{seed}{random seed (default = 12)}
 
-\item{s.formula}{the formula for survival model}
+\item{surv.dat2}{the survival dataset}
 
 \item{tol}{tolerance (default = 1e-3)}
 }

@@ -38,8 +38,8 @@ summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
 summary.mean
 
 ## model fit: RSF
-s.formula2 <- Surv(Time, death) ~ drugddI + CD4
-fit = RandomSurvivalForest(surv.dat2, s.formula2)
+s.formula.RSF <- Surv(Time, death) ~ drugddI + CD4
+fit = RandomSurvivalForest(surv.dat2, s.formula.RSF)
 
 head(fit$predicted) ## predicted value for each patient
 head(fit$survival[, 1:10]) ## In-bag survival function
@@ -76,6 +76,7 @@ for (i in 1:length(cv.dat)){
                                           long.test, surv.test,
                                           Tstart, Tstart+Tdelta, 
                                           mcem.train.mean)
+      
       stan.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
                                           long.test, surv.test,
                                           Tstart, Tstart+Tdelta, 
@@ -90,13 +91,29 @@ mcem.auc.bs.mean/length(cv.dat)
 stan.auc.bs.mean/length(cv.dat)
 
 ## Cross-validation: RSF
-cv.dat <- create_cv(long.dat, surv.dat)
-surv.train2 = left_join(cv.dat[[2]]$surv.train, nearestCD4, by="ID")
-surv.test2 = left_join(cv.dat[[2]]$surv.test, nearestCD4, by="ID")
+RSF.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+for (i in 1:length(cv.dat)){
+  ## training data and testing data
+  surv.train <- cv.dat[[i]][[3]]
+  surv.test <- cv.dat[[i]][[4]]
+  surv.train2 = left_join(surv.train, nearestCD4, by="ID")
+  surv.test2 = left_join(surv.test, nearestCD4, by="ID")
+  
+  fit = RandomSurvivalForest(surv.train2, s.formula.RSF)
+  res = predict(fit, newdata = surv.test2)
+  
+  RSF.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  index <- 0
+  for (Tstart in st){
+    for (Tdelta in dt){
+      index <- index + 1
+      RSF.auc.bs[index, ] <- calc_AUC_BS_RSF(surv.test2, Tstart, Tstart + Tdelta, res)
+    }
+  }
+  RSF.auc.bs.mean <- RSF.auc.bs.mean + RSF.auc.bs
+}
 
-fit = RandomSurvivalForest(surv.train2, s.formula2)
-res = predict(fit, newdata = surv.test2)
-res$err.rate[!is.na(res$err.rate)] ## prediction error rate
+RSF.auc.bs.mean/length(cv.dat)
 
 ## Simulation
 sim.dat <- SimulateDataset(seed = 1)

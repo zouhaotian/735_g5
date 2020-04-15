@@ -8,7 +8,8 @@ check_exist <- function(variable){
 }
 
 filter_dat <- function(long.test, surv.test, Tstart){
-  surv.ID <- surv.test[surv.test$Time>=Tstart, ]$ID
+  Time <- surv.test[, 1]
+  surv.ID <- surv.test[Time>=Tstart, ]$ID
   surv.filtered <- surv.test[surv.test$ID %in% surv.ID, ]
   long.filtered <- long.test[long.test$ID %in% surv.ID, ]
   l <- list(long.filtered = long.filtered, surv.filtered = surv.filtered)
