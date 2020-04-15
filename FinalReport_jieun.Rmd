@@ -12,6 +12,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 # NOTES
@@ -276,7 +277,7 @@ s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 With the new formula and dataset, we fit the random survival forest.
 
 ```{r}
-fit = jm.rsf(surv.dat.rsf, s.formula.rsf)
+fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
 
 fit$predicted ## predicted value for each patient
 ```
@@ -286,6 +287,7 @@ fit$survival ## In-bag survival function
 ```
 
 ```{r}
+library(randomForestSRC)
 plot.survival(fit) ## generates Survival plots
 ```
 
@@ -303,7 +305,7 @@ cv.dat <- create_cv(long.dat, surv.dat)
 surv.train2 = left_join(cv.dat[[2]]$surv.train, nearestCD4, by="ID")
 surv.test2 = left_join(cv.dat[[2]]$surv.test, nearestCD4, by="ID")
 
-fit = jm.rsf(surv.train2, s.formula2)
+fit = RandomSurvivalForest(surv.train2, s.formula.rsf)
 res = predict(fit, newdata = surv.test2)
 res$err.rate[!is.na(res$err.rate)] ## prediction error rate
 
