@@ -279,11 +279,11 @@ With the new formula and dataset, we fit the random survival forest.
 ```{r}
 fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
 
-fit$predicted ## predicted value for each patient
+head(fit$predicted)[1:5] ## predicted value for each patient
 ```
 
 ```{r}
-fit$survival ## In-bag survival function
+head(fit$survival)[,1:10] ## In-bag survival function
 ```
 
 ```{r}
