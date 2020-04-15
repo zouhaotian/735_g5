@@ -207,7 +207,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       ## obtain the response and covariates for subject i
       yi <- Y[ID.start[i]:ID.end[i]]
       ti <- obstime[ID.start[i]:ID.end[i]]
-      xi <- X[ID.start[i]:ID.end[i], ]
+      xi <- as.matrix(X[ID.start[i]:ID.end[i], ])
       long.const.mui <- theta.old$beta0 + (xi %*% theta.old$beta)[, 1]
       long.mui.nore <- long.const.mui + theta.old$beta1*ti
       
@@ -252,7 +252,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
     
     theta$beta0 <- mean(paras.est[(M.paras+1):(M.paras+burnin), 1])
     theta$beta1 <- mean(paras.est[(M.paras+1):(M.paras+burnin), 2])
-    theta$beta <- colMeans(paras.est[(M.paras+1):(M.paras+burnin), 3:p.long])
+    theta$beta <- colMeans(as.matrix(paras.est[(M.paras+1):(M.paras+burnin), 3:p.long]))
     theta$sigma_u <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 1])
     theta$sigma_e <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 2])
     theta$logh0 <- mean(paras.est[(M.paras+1):(M.paras+burnin), p.long + 3])
@@ -272,7 +272,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       cat(sprintf('Iter:%d curr.tol:%.6f\n', iter, curr.tol)) 
     }
     if (iter==max.iter){
-      warning('Iteration reached maximum without convergence!')
+      warning('Iteration reached maximum without convergence!\n')
     }
   }
   k <- unlist(theta)
