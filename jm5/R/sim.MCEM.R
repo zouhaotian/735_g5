@@ -12,7 +12,7 @@
 #' @return a data frame containing parameter name, true values of parameters, 
 #' mean of estimated parameters, SD of estimated parameters.
 #' 
-#' @example 
+#' @examples 
 #' 
 #' sim.MCEM(sim.num = 2)
 #' 
@@ -33,7 +33,10 @@ sim.MCEM = function(sim.num = 10, max.iter = 30, tol = 1e-3, seed = 123, progres
   
   Parameter = names(fit.MCEM)
   mean_estimate = rowMeans(estimate)
-  StdDev = sqrt(rowMeans((estimate - true_value)^2))
+  StdDev <- rep(NA, length(true_value))
+  for (i in 1:length(true_value)){
+    StdDev[i] <- sd(estimate[i, ])
+  }
   
   result = data.frame(Parameter = Parameter,
                       TrueVal = true_value,

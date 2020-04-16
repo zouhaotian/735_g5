@@ -25,3 +25,8 @@ mean of estimated parameters, SD of estimated parameters.
 This function allows you to evaluate the correctness of MCEM method
 using simulated data
 }
+\examples{
+
+sim.MCEM(sim.num = 2)
+
+}

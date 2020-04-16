@@ -181,7 +181,23 @@ To get initial values of $\log(h_0), \gamma, \alpha$, we fit an AFT model with e
 
 ### RSF
 
-For machine learning methods: We plan to use random survival forest, considering only for the survival model, and ignoring the longitudinal model, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
+
+For machine learning methods: We used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
+
+For the random survival forest, we use our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
+
+Here we use the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 and drug(ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
+
+$$
+Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
+$$
+
+The log-rank test for each split at value $c$ for a varialbe $x$ is
+$$
+L(x,c) = \frac{\sum\limits_{k=1}^{m} (d_{k,l} - Y_{k,l}\frac{d_k}{Y_k})}{\sqrt{\sum\limits_{k=1}^m \frac{Y_{k,l}}{Y_k} (1-\frac{Y_{k,l}}{Y_k}) (\frac{Y_k-d_k}{Y_k-1}) d_k}}
+$$
+
+We find the c such that maximizes $|L(x,c)|$, which means thhe differences between the two nodes are maximized.
 
 # Simulation
 
@@ -201,7 +217,8 @@ We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as similar as t
 
 ### Load our package `jm5` and separate AIDS dataset to longitudinal dataset and survival dataset
 
-```{r}
+```{r message=FALSE}
+library(tidyverse)
 library(knitr)
 library(devtools)
 load_all('jm5')
@@ -226,8 +243,85 @@ head(surv.dat)
 
 ### Summary statistics for AIDS dataset
 
-```{r}
+```{r echo=FALSE}
+va = c("ID", "Time", "death", "CD4", "obstime", "drug", "prevOI", "AZT", "gender")
+desc = c("Patients identifier (1-467)",
+         "The time to death or censoring",
+         "0 for censoring, 1 for death",
+         "The CD4 cells count",
+         "The time points at which the CD4 cells count was recorded (0, 2, 6, 12, 18)",
+         "ddI (1) for didanosine, ddC (0) for zalcitabine",
+         "AIDS (1) for previous opportunistic infection, noAIDS (0) for no previous infection",
+         "failure (1) for AZT failure, intolerance (0) for AZT intolerance",
+         "1 for male, 0 for female"
+         )
+summary_stat = data.frame(Variable = va, Description = desc)
+kable(summary_stat)
+```
 
+```{r echo=FALSE, out.width='50%'}
+summ = JM::aids[,c(1,3:9)] %>%
+  spread(key = obstime, value = CD4)
+summ = summ[,2:6]
+summ$drug = ifelse(summ$drug == "ddI", 1, 0)
+summ$gender = ifelse(summ$gender == "male", 1, 0)
+summ$prevOI = ifelse(summ$prevOI == "AIDS", 1, 0)
+summ$AZT = ifelse(summ$AZT == "failure", 1, 0)
+summ = gather(summ, death, drug, gender, prevOI, AZT,
+              key = "variables", value = "count")
+ggplot(summ, aes(variables)) +
+  geom_bar(aes(fill = as.factor(count))) +
+  theme_light() +
+  labs(x = "Variable",
+       y = "Count",
+       title = "Summary plot for dichotomous variables") +
+  scale_fill_discrete(name = NULL,
+                      labels = c("intolerance/censoring/ddC/female/noAIDS",
+                                 "failure/death/ddI/male/AIDS")) +
+  theme(legend.position="top")
+
+ggplot(surv.dat, aes(x = as.factor(ifelse(death == 0, "Censoring", "Death")), y = Time, fill = as.factor(drugddI))) +
+  geom_boxplot() +
+  labs(x = c("Status"),
+       y = "Time to death or censoring",
+       title = "Summary plot for survival part") +
+  scale_fill_discrete(name = "drug",
+                      labels = c("ddC","ddI")) +
+  theme_light() +
+  theme(legend.position="top")
+```
+
+```{r echo=FALSE, out.width='33.33%'}
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(prevOIAIDS))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "prevOI",
+                       labels = c("AIDS", "noAIDS")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by prevOI)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(drugddI))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "drug",
+                       labels = c("ddC", "ddI")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by drug)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(AZTfailure))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "AZT",
+                       labels = c("intolerance", "failure")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by AZT)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
 ```
 
 ### Model fit for AIDS dataset - MCEM algorithm
@@ -244,25 +338,40 @@ mcem.result
 
 ```{r}
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
-summary.mean <- summary(fit.result)$summary[, 1]
-summary.mean <- summary.mean[1:(length(summary.mean) - 1)]
-summary.mean
+fit.result
 ```
 
 ### RSF for AIDS dataset
 
-```{r}
+For RSF, since we used the CD4 count nearest to death as a covariate as well, we add this variable to our survival data.
 
+```{r}
+nearestCD4 = long.dat %>%
+  select(ID, obstime, CD4, drugddI) %>%
+  group_by(ID) %>%
+  filter(obstime==max(obstime)) %>%
+  select(ID, CD4)
+
+surv.dat.rsf = merge(surv.dat, nearestCD4, by="ID")
+s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
+```
+
+```{r}
+fit = RandomSurvivalForest(surv.dat2, s.formula.RSF)
+head(fit$survival[, 1:10]) ## In-bag survival function
 ```
 
 ### Cross-validation: AUC and BS for AIDS dataset (MCEM, Bayesian)
 
 ```{r}
-cv.dat <- create_cv(long.dat, surv.dat)
+cv.dat <- create_cv(long.dat, surv.dat) ## create 10 cv dataset repeats
 st <- c(2, 4, 6) ## starting time
 dt <- c(0.5, 1) ## prediction time window
 mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+```
+
+```{r include=FALSE}
 for (i in 1:length(cv.dat)){
   ## training data and testing data
   long.train <- cv.dat[[i]][[1]]
@@ -271,10 +380,9 @@ for (i in 1:length(cv.dat)){
   surv.test <- cv.dat[[i]][[4]]
   
   ## run MCEM and Stan on training dataset
-  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = FALSE)
-  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = FALSE)
-  stan.train.mean <- summary(stan.train)$summary[, 1]
-  stan.train.mean <- stan.train.mean[-length(stan.train.mean)]
+  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = TRUE)
+  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = TRUE)
+  stan.train.mean <- stan.train[-nrow(stan.train), 1]
   
   ## Calculate AUC and BS ##
   mcem.auc.bs <- matrix(NA, length(st)*length(dt), 2)
@@ -296,38 +404,112 @@ for (i in 1:length(cv.dat)){
   mcem.auc.bs.mean <- mcem.auc.bs.mean + mcem.auc.bs
   stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
 }
+mcem.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                          dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                          mcem.auc.bs.mean/length(cv.dat))
+colnames(mcem.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
+stan.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                          dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                          stan.auc.bs.mean/length(cv.dat))
+colnames(stan.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
+```
 
-mcem.auc.bs.mean/length(cv.dat)
-stan.auc.bs.mean/length(cv.dat)
+```{r}
+mcem.auc.bs.mean
+stan.auc.bs.mean
 ```
 
 ### Cross-validation: AUC and BS for AIDS dataset (RSF)
 
-```{r}
+```{r include=FALSE}
+## Cross-validation: RSF
+RSF.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+for (i in 1:length(cv.dat)){
+  ## training data and testing data
+  surv.train <- cv.dat[[i]][[3]]
+  surv.test <- cv.dat[[i]][[4]]
+  surv.train2 = left_join(surv.train, nearestCD4, by="ID")
+  surv.test2 = left_join(surv.test, nearestCD4, by="ID")
+  
+  fit = RandomSurvivalForest(surv.train2, s.formula.rsf)
+  res = predict(fit, newdata = surv.test2)
+  
+  RSF.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  index <- 0
+  for (Tstart in st){
+    for (Tdelta in dt){
+      index <- index + 1
+      RSF.auc.bs[index, ] <- calc_AUC_BS_RSF(surv.test2, Tstart, Tstart + Tdelta, res)
+    }
+  }
+  RSF.auc.bs.mean <- RSF.auc.bs.mean + RSF.auc.bs
+}
 
+RSF.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                         dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                         RSF.auc.bs.mean/length(cv.dat))
+```
+
+```{r}
+RSF.auc.bs.mean
 ```
 
 ### Simulation: evaluate correctness of MCEM and Bayesian methods
 
-```{r}
-
+MCEM method results:
+```{r message=FALSE, warning=FALSE}
+## Simulation for MCEM
+simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
 ```
 
-### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
-
 ```{r}
-
+kable(simulation.MCEM)
 ```
 
-### Simulation: estimated AUC, true AUC and estimated BS (RSF)
+Bayesian method results:
 
-```{r}
-
+```{r message=FALSE}
+simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```
 
-
+```{r}
+kable(simulation.Bayesian)
+```
 
 # Discussion
+
+### MCEM algorithm
+
+Advantages: 
+
+(1). Likelihood-based method, therefore robust and consistent; 
+(2). Fairly stable
+
+Disadvantages:
+
+(1). Computationally intensive, especially for M-step;
+(2). Difficult to implement
+
+### Bayesian method
+
+Advantages:
+(1). Likelihood-based method, therefore robust and consistent;
+(2). Fast computational speed;
+(3). Easy to implement
+
+Disadvantages:
+(1). Credible interval isn't necessarily equal to confidence interval
+
+### RSF
+
+Advantages:
+(1). Extremely fast speed;
+(2). Easy to implement
+
+Disadvantages:
+(1). Unstable (especially in estimation of AUC and BS)
+(2). Difficult to interpret;
+(3). No current method for joint modelling of longitudinal data and survival data
 
 # Future direction
 

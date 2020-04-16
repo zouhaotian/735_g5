@@ -22,7 +22,7 @@ check_exist <- function(variable){
 #' @param seed random seed (default = 123)
 #' @param progress whether to show progress in sampling (default = TRUE)
 #' 
-#' @return a Stan fit object
+#' @return summary table of sampling results
 #'  
 #' @examples
 #' 
@@ -32,7 +32,7 @@ check_exist <- function(variable){
 #' 
 #' @importFrom nlme lme VarCorr
 #' @importFrom survival Surv survreg
-#' @importFrom rstan rstan_options stan_model sampling 
+#' @importFrom rstan rstan_options stan_model sampling summary
 #' 
 #' @export
 fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
@@ -178,6 +178,7 @@ fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
   md = stan_model(model_code = model_code)
   fitStan <- sampling(md, data = stanDat, pars = pars, init = inits,
                       chains = 4, iter = n.iter, warmup = n.burnin,
-                      seed = seed, open_progress = progress)
-  return(fitStan)
+                      seed = seed, show_messages = progress)
+  summary.tab <- summary(fitStan)$summary
+  return(summary.tab)
 }

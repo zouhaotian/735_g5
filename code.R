@@ -60,8 +60,8 @@ for (i in 1:length(cv.dat)){
   surv.test <- cv.dat[[i]][[4]]
   
   ## run MCEM and Stan on training dataset
-  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10)
-  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train)
+  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = FALSE)
+  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = FALSE)
   stan.train.mean <- summary(stan.train)$summary[, 1]
   stan.train.mean <- stan.train.mean[-length(stan.train.mean)]
   
@@ -115,5 +115,3 @@ for (i in 1:length(cv.dat)){
 
 RSF.auc.bs.mean/length(cv.dat)
 
-## Simulation
-sim.dat <- SimulateDataset(seed = 1)

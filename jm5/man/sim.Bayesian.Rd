@@ -8,7 +8,8 @@ sim.Bayesian(
   sim.num = 10,
   n.iter = 2000,
   n.burnin = floor(n.iter/2),
-  seed = 123
+  seed = 123,
+  progress = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ sim.Bayesian(
 \item{n.burnin}{number of burnins in NUTS (default = n.iter/2)}
 
 \item{seed}{random seed (default = 123)}
+
+\item{progress}{whether to show progress for sampling (default = TRUE)}
 }
 \value{
 a data frame containing parameter name, true values of parameters, 
@@ -28,4 +31,9 @@ mean of SE^2 and coverage probability.
 \description{
 This function allows you to evaluate the correctness of Bayesian method
 using simulated data
+}
+\examples{
+
+sim.Bayesian(sim.num = 2)
+
 }

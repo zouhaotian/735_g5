@@ -141,7 +141,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
   
   random.effects <- as.vector(fit.lme$coefficients$random[[1]])
   Sigma <- as.numeric(VarCorr(fit.lme))
-  sigma_u <- Sigma[2]
+  sigma_u <- Sigma[3]
   sigma_e <- Sigma[4]
   
   ## survival part
@@ -272,7 +272,7 @@ MCEM <- function(l.formula, s.formula, long.dat, surv.dat,
       cat(sprintf('Iter:%d curr.tol:%.6f\n', iter, curr.tol)) 
     }
     if (iter==max.iter){
-      warning('Iteration reached maximum without convergence!\n')
+      warning('Iteration reached maximum without convergence!')
     }
   }
   k <- unlist(theta)

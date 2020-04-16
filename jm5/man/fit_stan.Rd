@@ -33,7 +33,7 @@ fit_stan(
 \item{progress}{whether to show progress in sampling (default = TRUE)}
 }
 \value{
-a Stan fit object
+summary table of sampling results
 }
 \description{
 This function allows you to pass in longitudinal and survival
