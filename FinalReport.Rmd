@@ -290,6 +290,7 @@ sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2),
 library(tidyverse)
 library(knitr)
 library(devtools)
+library(randomForestSRC)
 load_all('jm5')
 ```
 
@@ -623,14 +624,8 @@ As for machine learning methods, there is no existing method to jointly model lo
 
 2. Ye and Wu. "Two-step and likelihood methods for joint models of longitudinal and survival data." Communications in Statistics - Simulation and Computation Vol 46, Issue 8 (2017): 6019-6033. https://doi.org/10.1080/03610918.2016.1188208
 
-3. Serrat et al. "Frequentist and Bayesian approaches for a joint model for prostate cancer risk and longitudinal PSA data." Journal of Applied Statistics: 42(6). 
+3. Serrat et al. "Frequentist and Bayesian approaches for a joint model for prostate cancer risk and longitudinal prostate-specific antigen data." Journal of Applied Statistics: 42(6). https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032
 
-3. http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
+4. http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
 
-4. http://www.drizopoulos.com/vignettes/dynamic_predictions
-
-5. https://www.tandfonline.com/doi/abs/10.1080/03610918.2016.1188208
-
-6. https://upcommons.upc.edu/bitstream/handle/2117/85035/Serrat-etal-final.pdf
-
-7. https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032
+5. http://www.drizopoulos.com/vignettes/dynamic_predictions
