@@ -60,7 +60,7 @@ Final Presentation (~ 25 minutes with questions)
 
 # Introduction
 
-Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (Ye at al, 2017) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (Serrat et al.) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
+Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (Ye at al, 2017) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (Serrat et al, 2015) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
 
 ## Dataset
 
