@@ -213,6 +213,39 @@ $$
 
 We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as similar as the `aids` data in the longitudinal model, and another 200 subjects as the testing dataset.
 
+# Software implementation
+
+We write our package `jm5`. Here are the main functions:
+
+```{r eval=FALSE}
+jm_filter <- function(l.formula, s.formula, dat, ID){}
+
+MCEM <- function(l.formula, s.formula, long.dat, surv.dat, 
+                 max.iter = 30, tol = 1e-3, seed = 123, 
+                 progress = TRUE){}
+
+fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
+                     n.iter = 2000, 
+                     n.burnin = floor(n.iter/2),
+                     seed = 123,
+                     progress = TRUE){}
+
+RandomSurvivalForest = function(surv.dat, s.formula, ntree=100,seed=12,...)  {}
+
+create_cv <- function(long.dat, surv.dat, ratio = 3, reps = 10, seed = 123){}
+
+calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test, 
+                        Tstart, Tstop, summary.mean, seed = 123){}
+
+calc_AUC_BS_RSF <- function(surv.test2, Tstart, Tstop, res){}
+
+SimulateDataset = function(n.train = 500, n.test = 200, seed){}
+
+sim.MCEM = function(sim.num = 10, max.iter = 30, tol = 1e-3, seed = 123, progress = TRUE){}
+
+sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2), seed = 123, progress = TRUE){}
+```
+
 # Results 
 
 ### Load our package `jm5` and separate AIDS dataset to longitudinal dataset and survival dataset
@@ -483,6 +516,22 @@ kable(simulation.Bayesian)
 ```
 
 # Discussion
+
+### Main conclusion from MCEM and Bayesian results
+
+(1). The expected value of CD4 count is 10.2 (9.43, 10.9), for a patient at baseline, receiving ddC drug, with no previous AIDS diagnostic, and AZT tolerance.
+
+(2). The expected change of CD4 count is -0.17 (-0.19, -0.15) when the observed time increased by one month, for the same patient.
+
+(3). When a patient is treated with ddI, his expected CD4 count will be higher: 0.45 (-0.32, 1.20), compared with another patient treated with ddC, given the same observed time, previous AIDS diagnostic, AZT tolerance status and same random effect.
+
+(4). When a patient has previous AIDS diagnostic, his expected CD4 count will be lower: -4.71 (-5.68, -3.74), compared with another patient without previous AIDS diagnostic, given the same observed time, same drug, AZT tolerance status and same random effect.
+
+(5). When a patient has AZT failure, his expected CD4 count will be lower: -0.31 (-1.27, 0.60), compared with another patient with AZT tolerance, given the same observed time, same drug, same AIDS diagnostic status and same random effect.
+
+(6). The log hazard ratio for patients with drug ddC vs. ddI is estimated to be 0.31 (0.02, 0.60), given same latent CD4 count over time, indicating ddC may increase CD4 count, by has more severe side effects than ddI.
+
+(7). The latent CD4 count is negatively associated with hazard function: estimated log HR is -0.28 (-0.35, -0.22).
 
 ### MCEM algorithm
 

@@ -1,12 +1,3 @@
-check_exist <- function(variable){
-  for (i in 1:length(variable)){
-    if (!exists(variable[i])){
-      err_message <- paste0('Variable ', l.variable, ' does not exist!')
-      stop(err_message)
-    }
-  }
-}
-
 log.lik <- function(yi, ti, xi, Ti, di, wi, theta, ut, fixed.eff){
   ll <- sum(dnorm(yi, fixed.eff$long.mui.nore + ut, theta$sigma_e, log = T)) + 
     di*(fixed.eff$loghi.nore + theta$alpha*ut) + fixed.eff$logSi.nore*exp(theta$alpha*ut) + 

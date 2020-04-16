@@ -1,12 +1,3 @@
-check_exist <- function(variable){
-  for (i in 1:length(variable)){
-    if (!exists(variable[i])){
-      err_message <- paste0('Variable ', l.variable, ' does not exist!')
-      stop(err_message)
-    }
-  }
-}
-
 #' Joint modeling using Stan
 #'
 #' This function allows you to pass in longitudinal and survival

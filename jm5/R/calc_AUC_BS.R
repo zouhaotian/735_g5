@@ -1,12 +1,3 @@
-check_exist <- function(variable){
-  for (i in 1:length(variable)){
-    if (!exists(variable[i])){
-      err_message <- paste0('Variable ', l.variable, ' does not exist!')
-      stop(err_message)
-    }
-  }
-}
-
 filter_dat <- function(long.test, surv.test, Tstart){
   Time <- surv.test[, 1]
   surv.ID <- surv.test[Time>=Tstart, ]$ID
