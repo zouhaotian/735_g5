@@ -513,6 +513,12 @@ Disadvantages:
 
 # Future direction
 
+For MCEM method, it is very hard to directly optimize the objective function in M-step. One possible way is to approximate the objective function by Taylor expansion and find a majorization function. 
+
+Moreover, we can generalize the baseline hazard function into a non-constant function $h_0(t)$. This will convert our model into a semi-parametric model. One simple way is to approximate baseline hazard function by step function.
+
+As for machine learning methods, there is no existing method to jointly model longitudinal data and survival data. One way is to construct neural networks. We first construct neural networks to model the longitudinal mean. With predicted longitudinal mean, we model survival data with neural networks. To avoid two-step estimation, loss functions for two neural networks can be minimized jointly, which, however, may require more data to converge. Another way is to apply offline reinforcement learning. In this setting, we can treat the drug as action and survival status at different time as state.
+
 # References 
 
 Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42.
