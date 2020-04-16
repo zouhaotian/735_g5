@@ -230,7 +230,7 @@ $$
 
 We find the c such that maximizes $|L(x,c)|$, which means the differences between the two nodes are maximized.
 
-# Simulation
+# Data simulation
 
 In order to ensure our methods are correct, we simulated data to test our package. Our simulation set-up is as follows:
 
