@@ -60,7 +60,7 @@ Final Presentation (~ 25 minutes with questions)
 
 # Introduction
 
-Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (NEED CITATION) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (NEED CITATION) suggests that Bayesian methods are more efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
+Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (NEED CITATION- https://www.tandfonline.com/doi/abs/10.1080/03610918.2016.1188208) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (NEED CITATION- https://upcommons.upc.edu/bitstream/handle/2117/85035/Serrat-etal-final.pdf, https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
 
 ## Dataset
 
@@ -153,11 +153,11 @@ $$
     P(T_{i'}>T' | T_{i'}>T) = S_{i'}(T' |  \boldsymbol{\hat \theta}, u_{i'}^{(d)})/S_{i'}(T  | \boldsymbol{\hat \theta}, u_{i'}^{(d)})
 $$
 
-We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy. We will compare the model estimates, standard error, computation speed, and prediction accuracy. We will use cross-validation with 3:1 ratio to check prediction accuracy.
+We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy. We will compare the model estimates, standard error, computation speed, and prediction accuracy. We used cross-validation with 3:1 ratio to check prediction accuracy.
 
 # Details in methods
 
-We use MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
+we used MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
 
 ### MCEM algorithm
 
@@ -173,21 +173,21 @@ where $$l_i(\theta | Y_i, T_i) = \sum_{j=1}^{J_i} \log P(Y_{ij}|\theta, u_i) + \
 
 $$f(u_i | \theta^{(t)}, Y_i, T_i) \propto \prod_{j=1}^{j_i} P(Y_{ij} |u_i, \boldsymbol{\theta^{(t)}}) h_i(T_i | \theta^{(t)})^{\delta_i}S_i(T_i | \theta^{(t)}) P(u_{i} | \boldsymbol{ \theta^{(t)}})$$.
 
-We will use the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method.
+We used the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method.
 
 After we sample $M$ random effect for each subject, we get the augmented longitudinal dataset and survival dataset.
 
 Second, we calculate $\sigma_u^{(t+1)} = \text{SD}(\boldsymbol{u})$, where $\boldsymbol{u}$ is a vector of random effects for all subjects. We calculate $\sigma_e^{(t+1)}$ by simply fitting a linear model using augmented longitudinal dataset, treating $\boldsymbol{u}$ as the offset.
 
-Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we use MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
+Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we used MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
 
 Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
 
 ### Bayesian methods
 
-We will use Stan to perform sampling, where we will use No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).
+We used Stan to perform sampling, where We used No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).
 
-We will use normal prior distributions for $\beta$..., and inverse Gamma prior distributions for the variance parameters. We will use the following prior distribution for the parameters for Bayesian methods:
+We used normal prior distributions for $\beta$..., and inverse Gamma prior distributions for the variance parameters. We used the following prior distribution for the parameters for Bayesian methods:
 
 (1) $\beta \sim N(0, 10^2)$.
 
@@ -212,12 +212,11 @@ To get initial values of $\log(h_0), \gamma, \alpha$, we fit an AFT model with e
 
 ### RSF
 
+For machine learning methods, we used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where We used the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
 
-For machine learning methods: We used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
+For the random survival forest, we used our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
 
-For the random survival forest, we use our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
-
-Here we use the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 and drug(ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
+Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 and drug(ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
 
 $$
 Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
@@ -556,7 +555,9 @@ kable(simulation.Bayesian)
 
 # Discussion
 
-### Main conclusion from MCEM and Bayesian results
+In summary, we found that Bayesian methods ran quicker than frequentist methods (MCEM). Additionally, our package for all three methods ran successfully with the simulated data.
+
+## Main conclusion from MCEM and Bayesian results
 
 (1). The expected value of CD4 count is 10.2 (9.43, 10.9), for a patient at baseline, receiving ddC drug, with no previous AIDS diagnostic, and AZT tolerance.
 
@@ -572,15 +573,17 @@ kable(simulation.Bayesian)
 
 (7). The latent CD4 count is negatively associated with hazard function: estimated log HR is -0.28 (-0.35, -0.22).
 
+## Limitations
+
+Below are some advantages and disadvanges of the three methods.
+
 ### MCEM algorithm
 
 Advantages: 
-
 (1). Likelihood-based method, therefore robust and consistent; 
 (2). Fairly stable
 
 Disadvantages:
-
 (1). Computationally intensive, especially for M-step;
 (2). Difficult to implement
 
@@ -592,7 +595,8 @@ Advantages:
 (3). Easy to implement
 
 Disadvantages:
-(1). Credible interval isn't necessarily equal to confidence interval
+(1). Credible interval isn't necessarily equal to confidence interval;
+(2). Depends on prior
 
 ### RSF
 
@@ -601,11 +605,11 @@ Advantages:
 (2). Easy to implement
 
 Disadvantages:
-(1). Unstable (especially in estimation of AUC and BS)
+(1). Unstable (especially in estimation of AUC and BS);
 (2). Difficult to interpret;
 (3). No current method for joint modelling of longitudinal data and survival data
 
-# Future direction
+## Future direction
 
 For MCEM method, it is very hard to directly optimize the objective function in M-step. One possible way is to approximate the objective function by Taylor expansion and find a majorization function. 
 
