@@ -330,15 +330,21 @@ ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.fa
 l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
 s.formula2 <- Surv(Time, death) ~ drugddI
 
+start = Sys.time()
 mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
 mcem.result
+end = Sys.time()
+print(end - start)
 ```
 
 ### Model fit for AIDS dataset - Bayesian method
 
 ```{r}
+start = Sys.time()
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
 fit.result
+end = Sys.time()
+print(end - start)
 ```
 
 ### RSF for AIDS dataset
