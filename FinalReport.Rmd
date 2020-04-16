@@ -14,30 +14,71 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# NOTES
-Aim for Introduction to the dataset and the question, a Methods section with any important pre-processing etc., three sections of Results (which may also contain some method details), and Discussion about interpretation or possible future directions. 
+# RUBRIC
+Introduction
+	Clear background on problem to be addressed given
+	Question(s) to be explored discussed and learn
+	Brief description of data/characteristics, how it related to addressing question(s)
+
+Methods
+	Explanation of key data preprocessing/wrangling steps (if any) + rationale
+	Clear description of Module 2 likelihood based methods used, with the following
+		Likelihood
+		Estimation procedure/hypothesis testing approach (if relevant)
+		Motivation for use and justification, assumptions
+	Discussion of Module 3 machine learning used
+		Justification for use
+		Discussion of tuning parameter/hyper parameter selection strategy
+	Metrics for performance comparison between proposed models 
+	All specialized methods should leverage R package (should be loaded first)
+		Functions used from package should be briefly described
+	
+Results
+	Clear Figures/tables describing and summarizing key outcomes/variables
+	Clear Figures/table illustrating results that directly addresses question(s)
+	Proper and clear descriptions of results based on figures and tables
+	Code/output is fine in document, but excessive and repetitive code/output should be avoided
+
+Discussion/Conclusion
+	Summarization of main points, conclusions based in results
+	Discussion of limitations if any
+
+R package
+	Should pass package tests
+	Clear documentation for user-facing functions
+	Code should be clear and commented
+	Module 2 methods should be implemented in package and referenced in doc
+	Avoiding inefficient coding practices
+	
+Final Presentation (~ 25 minutes with questions)
+	Similar criteria as Intro, Methods, Results, Discussion as above
+	Focus is on clarity of presentation and communication 
+	All students should speak, ideally for similar amounts of time
+	Ability to clearly and effectively answer questions from class/myself
+	Slides or markdown file for presentation is fine
+
 
 # Introduction
 
-# Dataset
+Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (NEED CITATION) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (NEED CITATION) suggests that Bayesian methods are more efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
 
-We examined the `AIDS` dataset for our project, found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
+## Dataset
 
-# Aims
+For our project, we examined the `AIDS` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
 
-Our study aims are as follows:
+## Objectives
 
-(1). We will assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, gender, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance. We don't include the gender covariate, because more than 90% of subjects are Male, which leads to power loss when estimating gender coefficient.
+(1). To assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance. 
 
-(2). We will use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
+(2). To use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
 
-(3). We will assess and compare the model fitting result (mean and standard error) for the MCEM method and Bayesian method. We will also try Random Survival Forest. We will also do a simulation to compare the model fitting result.
+(3). To assess and compare the model fitting result (mean and standard error) for the frequentist and Bayesian methods. We also used Random Survival Forest for comparison. We also simulated similar data to compare the model fitting results.
 
-(4). We will also propose a dynamic prediction framework to patients with some longitudinal outcomes available, for predicting the future longitudinal outcome and conditional survival probability at a given time.
+(4). To propose a dynamic prediction framework to patients with longitudinal outcomes available, such as predicting the future longitudinal outcome and conditional survival probability at a given time.
 
 # Methods 
 
-Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. A joint model is preferred to a two-step approach since previous studies have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates. For joint modelling, previous literature suggests that Bayesian methods are more efficient and computationally easier. We will compare frequentist methods to Bayesian methods by doing aim analysis with the Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods.
+Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods. We are interested in seeing the accurracy and differences of these methods as well as compuational speed.
 
 In the sections below, we describe in detail our model and methods.
 
@@ -253,7 +294,7 @@ library(devtools)
 load_all('jm5')
 ```
 
-Define our longitudinal formula and survival formula, and separate datasets
+First, we define our longitudinal formula and survival formula, and creaete separate datasets.
 
 ```{r}
 l.formula <- CD4 ~ obstime + drug + prevOI + AZT
@@ -264,7 +305,7 @@ long.dat <- l[[1]]
 surv.dat <- l[[2]]
 ```
 
-Head of longitudinal dataset and survival dataset
+Below are the top 6 observations of the longitudinal and survival datasets.
 ```{r}
 head(long.dat)
 head(surv.dat)
@@ -319,6 +360,8 @@ ggplot(surv.dat, aes(x = as.factor(ifelse(death == 0, "Censoring", "Death")), y 
   theme_light() +
   theme(legend.position="top")
 ```
+
+Since more than 90% of subjects are male, we do not include the gender covariate for the first aim. The gender inbalance leads to power loss when estimating the gender coefficient.
 
 ```{r echo=FALSE, out.width='33.33%'}
 ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(prevOIAIDS))) +
@@ -378,7 +421,7 @@ print(end - start)
 
 ### RSF for AIDS dataset
 
-For RSF, since we used the CD4 count nearest to death as a covariate as well, we add this variable to our survival data.
+For RSF, since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data.
 
 ```{r}
 nearestCD4 = long.dat %>%
