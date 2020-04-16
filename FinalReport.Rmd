@@ -559,15 +559,15 @@ In summary, we found that Bayesian methods ran quicker than frequentist methods 
 
 ## Main conclusion from MCEM and Bayesian results
 
-(1). At baseline, the expected value of CD4 count is 10.2 (9.43, 10.9), for a AZT-tolerant patient receiving zalcitabine with no previous AIDS diagnosis at study entry.
+(1). At baseline, the expected value of CD4 count is 10.2 (9.43, 10.9), for a AZT-intolerant patient receiving zalcitabine with no previous AIDS diagnosis at study entry.
 
 (2). The expected change of CD4 count was -0.17 (-0.19, -0.15) when the observed time increased by one month, for the same patient.
 
-(3). When a patient is treated with didanosine, his expected CD4 count will be higher, compared with another patient treated with zalcitabine, given the same observed time, previous AIDS diagnosis, AZT tolerance status, and random effect: : 0.45 (-0.32, 1.20).
+(3). When a patient is treated with didanosine, his expected CD4 count will be higher compared with another patient treated with zalcitabine, given the same observed time, previous AIDS diagnosis, AZT tolerance status, and random effect: : 0.45 (-0.32, 1.20).
 
 (4). When a patient has previous opportunistic infection (AIDS diagnosis) at study entry, his/her expected CD4 count will be lower, compared with another patient without previous infection, given the same observed time, treatment drug, AZT tolerance status and random effect: -4.71 (-5.68, -3.74).
 
-(5). When a patient has AZT failure, his expected CD4 count will be lower, compared with another AZT-tolerant patient, given the same observed time, treatment drug, AIDS diagnosis and random effect: -0.31 (-1.27, 0.60).
+(5). When a patient has AZT failure, his expected CD4 count will be lower, compared with another AZT-intolerant patient, given the same observed time, treatment drug, AIDS diagnosis and random effect: -0.31 (-1.27, 0.60).
 
 (6). The log hazard ratio for patients with drug zalcitabine vs. didanosine is estimated to be 0.31 (0.02, 0.60), given same latent CD4 cell count over time, indicating zalcitabine may increase CD4 count by having more severe side effects than didanosine.
 
