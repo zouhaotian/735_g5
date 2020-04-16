@@ -60,7 +60,7 @@ Final Presentation (~ 25 minutes with questions)
 
 # Introduction
 
-Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (NEED CITATION- https://www.tandfonline.com/doi/abs/10.1080/03610918.2016.1188208) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (NEED CITATION- https://upcommons.upc.edu/bitstream/handle/2117/85035/Serrat-etal-final.pdf, https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
+Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (Ye at al, 2017) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (Serrat et al.) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
 
 ## Dataset
 
@@ -619,11 +619,18 @@ As for machine learning methods, there is no existing method to jointly model lo
 
 # References 
 
-Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42.
+1. Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. https://doi.org/10.1177/0962280217722177
 
-https://doi.org/10.1177/0962280217722177
+2. Ye and Wu. "Two-step and likelihood methods for joint models of longitudinal and survival data." Communications in Statistics - Simulation and Computation Vol 46, Issue 8 (2017): 6019-6033. https://doi.org/10.1080/03610918.2016.1188208
 
-http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
+3. Serrat et al. "Frequentist and Bayesian approaches for a joint model for prostate cancer risk and longitudinal PSA data." Journal of Applied Statistics: 42(6). 
 
-http://www.drizopoulos.com/vignettes/dynamic_predictions
+3. http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
 
+4. http://www.drizopoulos.com/vignettes/dynamic_predictions
+
+5. https://www.tandfonline.com/doi/abs/10.1080/03610918.2016.1188208
+
+6. https://upcommons.upc.edu/bitstream/handle/2117/85035/Serrat-etal-final.pdf
+
+7. https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032
