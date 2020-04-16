@@ -307,32 +307,3 @@ stan.auc.bs.mean/length(cv.dat)
 ```{r}
 
 ```
-
-### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
-
-```{r}
-
-```
-
-### Simulation: estimated AUC, true AUC and estimated BS (RSF)
-
-```{r}
-
-```
-
-# Discussion
-
-## Integration
-
-## Future direction
-
-# References 
-
-Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42.
-
-https://doi.org/10.1177/0962280217722177
-
-http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
-
-http://www.drizopoulos.com/vignettes/dynamic_predictions
-
