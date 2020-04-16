@@ -216,7 +216,7 @@ For machine learning methods, we used the random survival forest (RSF), consider
 
 For the random survival forest, we used our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
 
-Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 and drug(ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
+Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
 
 $$
 Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
@@ -559,19 +559,19 @@ In summary, we found that Bayesian methods ran quicker than frequentist methods 
 
 ## Main conclusion from MCEM and Bayesian results
 
-(1). The expected value of CD4 count is 10.2 (9.43, 10.9), for a patient at baseline, receiving ddC drug, with no previous AIDS diagnostic, and AZT tolerance.
+(1). At baseline, the expected value of CD4 count is 10.2 (9.43, 10.9), for a AZT-tolerant patient receiving zalcitabine with no previous AIDS diagnosis at study entry.
 
-(2). The expected change of CD4 count is -0.17 (-0.19, -0.15) when the observed time increased by one month, for the same patient.
+(2). The expected change of CD4 count was -0.17 (-0.19, -0.15) when the observed time increased by one month, for the same patient.
 
-(3). When a patient is treated with ddI, his expected CD4 count will be higher: 0.45 (-0.32, 1.20), compared with another patient treated with ddC, given the same observed time, previous AIDS diagnostic, AZT tolerance status and same random effect.
+(3). When a patient is treated with didanosine, his expected CD4 count will be higher, compared with another patient treated with zalcitabine, given the same observed time, previous AIDS diagnosis, AZT tolerance status, and random effect: : 0.45 (-0.32, 1.20).
 
-(4). When a patient has previous AIDS diagnostic, his expected CD4 count will be lower: -4.71 (-5.68, -3.74), compared with another patient without previous AIDS diagnostic, given the same observed time, same drug, AZT tolerance status and same random effect.
+(4). When a patient has previous opportunistic infection (AIDS diagnosis) at study entry, his/her expected CD4 count will be lower, compared with another patient without previous infection, given the same observed time, treatment drug, AZT tolerance status and random effect: -4.71 (-5.68, -3.74).
 
-(5). When a patient has AZT failure, his expected CD4 count will be lower: -0.31 (-1.27, 0.60), compared with another patient with AZT tolerance, given the same observed time, same drug, same AIDS diagnostic status and same random effect.
+(5). When a patient has AZT failure, his expected CD4 count will be lower, compared with another AZT-tolerant patient, given the same observed time, treatment drug, AIDS diagnosis and random effect: -0.31 (-1.27, 0.60).
 
-(6). The log hazard ratio for patients with drug ddC vs. ddI is estimated to be 0.31 (0.02, 0.60), given same latent CD4 count over time, indicating ddC may increase CD4 count, by has more severe side effects than ddI.
+(6). The log hazard ratio for patients with drug zalcitabine vs. didanosine is estimated to be 0.31 (0.02, 0.60), given same latent CD4 cell count over time, indicating zalcitabine may increase CD4 count by having more severe side effects than didanosine.
 
-(7). The latent CD4 count is negatively associated with hazard function: estimated log HR is -0.28 (-0.35, -0.22).
+(7). The latent CD4 count is negatively associated with hazard function. The estimated log hazard ratio is -0.28 (-0.35, -0.22).
 
 ## Limitations
 
