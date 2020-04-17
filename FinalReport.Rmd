@@ -247,7 +247,7 @@ In order to obtain a death rate close to that of the `AIDS` dataset ($40.25\%$),
 
 For each simulation, we produce two sets of joint data: one longitudinal dataset and one survival dataset. The survival dataset consists of one row per subject with variables time to event, death indicator, and treatment group (drug). The longitudinal dataset consists of multiple observations per subject with variables response, observed time, and covariates. Subjects do not have observation times beyond the event time.
 
-For cross validation, we simulated N=500 subjects for the training dataset and another 200 subjects for the testing dataset.
+We simulated N=500 subjects for the training dataset and another 200 subjects for the testing dataset.
 
 # Software implementation
 
