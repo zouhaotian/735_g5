@@ -1,7 +1,7 @@
 ---
 title: "BIOS735 Final Report"
 author: "Group 5: Ji-Eun Park, Yueqi Shen, Jianqiao Wang, Yangjianchen Xu, Christina Zhou, Haotian Zou"
-date: "4/27/2020"
+date: "4/22/2020"
 output:
   html_document:
     toc: true
@@ -9,54 +9,6 @@ output:
       collapsed: true
       smooth_scroll: true
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-# RUBRIC
-Introduction
-	Clear background on problem to be addressed given
-	Question(s) to be explored discussed and learn
-	Brief description of data/characteristics, how it related to addressing question(s)
-
-Methods
-	Explanation of key data preprocessing/wrangling steps (if any) + rationale
-	Clear description of Module 2 likelihood based methods used, with the following
-		Likelihood
-		Estimation procedure/hypothesis testing approach (if relevant)
-		Motivation for use and justification, assumptions
-	Discussion of Module 3 machine learning used
-		Justification for use
-		Discussion of tuning parameter/hyper parameter selection strategy
-	Metrics for performance comparison between proposed models 
-	All specialized methods should leverage R package (should be loaded first)
-		Functions used from package should be briefly described
-	
-Results
-	Clear Figures/tables describing and summarizing key outcomes/variables
-	Clear Figures/table illustrating results that directly addresses question(s)
-	Proper and clear descriptions of results based on figures and tables
-	Code/output is fine in document, but excessive and repetitive code/output should be avoided
-
-Discussion/Conclusion
-	Summarization of main points, conclusions based in results
-	Discussion of limitations if any
-
-R package
-	Should pass package tests
-	Clear documentation for user-facing functions
-	Code should be clear and commented
-	Module 2 methods should be implemented in package and referenced in doc
-	Avoiding inefficient coding practices
-	
-Final Presentation (~ 25 minutes with questions)
-	Similar criteria as Intro, Methods, Results, Discussion as above
-	Focus is on clarity of presentation and communication 
-	All students should speak, ideally for similar amounts of time
-	Ability to clearly and effectively answer questions from class/myself
-	Slides or markdown file for presentation is fine
-
 
 # Introduction
 
@@ -367,12 +319,13 @@ ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.fa
   geom_line() +
   scale_x_continuous(breaks = c(0,2,6,12,18)) +
   scale_color_discrete(name = "prevOI",
-                       labels = c("AIDS", "noAIDS")) +
+                       labels = c("no AIDS", "AIDS")) +
   labs(y = "CD4 cell counts",
        x = "Observation time",
        title = "Summary plot for longitudinal part (grouped by prevOI)") +
   theme_light() +
   theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+
 ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(drugddI))) +
   geom_line() +
   scale_x_continuous(breaks = c(0,2,6,12,18)) +
@@ -383,11 +336,12 @@ ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.fa
        title = "Summary plot for longitudinal part (grouped by drug)") +
   theme_light() +
   theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+
 ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(AZTfailure))) +
   geom_line() +
   scale_x_continuous(breaks = c(0,2,6,12,18)) +
   scale_color_discrete(name = "AZT",
-                       labels = c("intolerance", "failure")) +
+                       labels = c("tolerance", "intolerance")) +
   labs(y = "CD4 cell counts",
        x = "Observation time",
        title = "Summary plot for longitudinal part (grouped by AZT)") +
@@ -443,12 +397,12 @@ head(fit$survival[, 1:10]) ## In-bag survival function
 ```{r}
 cv.dat <- create_cv(long.dat, surv.dat) ## create 10 cv dataset repeats
 st <- c(2, 4, 6) ## starting time
-dt <- c(0.5, 1) ## prediction time window
+dt <- c(0.8, 1) ## prediction time window
 mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 ```
 
-```{r include=FALSE, message=FALSE, warning=FALSE}
+```{r include=FALSE, message=FALSE, warning=FALSE, results=FALSE}
 for (i in 1:length(cv.dat)){
   ## training data and testing data
   long.train <- cv.dat[[i]][[1]]
@@ -482,11 +436,11 @@ for (i in 1:length(cv.dat)){
   stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
 }
 mcem.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                          dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                          dt = c(0.8, 1, 0.8, 1, 0.8, 1),
                           mcem.auc.bs.mean/length(cv.dat))
 colnames(mcem.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
 stan.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                          dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                          dt = c(0.8, 1, 0.8, 1, 0.8, 1),
                           stan.auc.bs.mean/length(cv.dat))
 colnames(stan.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
 ```
@@ -498,7 +452,7 @@ stan.auc.bs.mean
 
 ### Cross-validation: AUC and BS for AIDS dataset (RSF)
 
-```{r include=FALSE, message=FALSE, warning=FALSE}
+```{r include=FALSE, message=FALSE, warning=FALSE, results=FALSE}
 ## Cross-validation: RSF
 RSF.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 for (i in 1:length(cv.dat)){
@@ -523,7 +477,7 @@ for (i in 1:length(cv.dat)){
 }
 
 RSF.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                         dt = c(0.5, 1, 0.5, 1, 0.5, 1),
+                         dt = c(0.8, 1, 0.8, 1, 0.8, 1),
                          RSF.auc.bs.mean/length(cv.dat))
 ```
 
@@ -534,7 +488,7 @@ RSF.auc.bs.mean
 ### Simulation: evaluate correctness of MCEM and Bayesian methods
 
 MCEM method results:
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, results=FALSE}
 ## Simulation for MCEM
 simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
 ```
@@ -545,7 +499,7 @@ kable(simulation.MCEM)
 
 Bayesian method results:
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE, results=FALSE}
 simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```
 
@@ -569,7 +523,7 @@ In summary, we found that Bayesian methods ran quicker than frequentist methods 
 
 (5). When a patient has AZT failure, his expected CD4 count will be lower, compared with another AZT-intolerant patient, given the same observed time, treatment drug, AIDS diagnosis and random effect: -0.31 (-1.27, 0.60).
 
-(6). The log hazard ratio for patients with drug zalcitabine vs. didanosine is estimated to be 0.31 (0.02, 0.60), given same latent CD4 cell count over time, indicating zalcitabine may increase CD4 count by having more severe side effects than didanosine.
+(6). The log hazard ratio for patients with drug didanosine vs. zalcitabine is estimated to be 0.31 (0.02, 0.60), given same latent CD4 cell count over time, indicating didanosine may increase CD4 count by having more severe side effects than zalcitabine.
 
 (7). The latent CD4 count is negatively associated with hazard function. The estimated log hazard ratio is -0.28 (-0.35, -0.22).
 
