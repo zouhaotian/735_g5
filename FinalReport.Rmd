@@ -290,7 +290,6 @@ sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2),
 library(tidyverse)
 library(knitr)
 library(devtools)
-library(randomForestSRC)
 load_all('jm5')
 ```
 
