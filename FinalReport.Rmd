@@ -434,7 +434,7 @@ s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 ```
 
 ```{r}
-fit = RandomSurvivalForest(surv.dat2, s.formula.RSF)
+fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
 head(fit$survival[, 1:10]) ## In-bag survival function
 ```
 
