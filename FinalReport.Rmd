@@ -16,9 +16,9 @@ Data does not always fall in clear-cut categories that fit pre-specified models.
 
 ## Dataset
 
-For our project, we examined the `AIDS` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
+For our project, we examined the `aids` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
 
-The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cells. Thus, the CD4 cell count decreases as HIV infection progresses. A person is diagnosed with AIDS when the CD4 count drops below 200 cells. Thus, a typical outcome of interest for an AIDS study is the CD4 cell count, and monitoring the count over time is common.
+The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cells. Thus, the CD4 cell count decreases as HIV infection progresses. A person is diagnosed with AIDS when the CD4 count drops below 200 cells. Thus, a typical outcome of interest for an AIDS study is the CD4 cell count, and monitoring the count over time is common. A typical transformation of CD4 count is the square root transformation (for normality distribution), which is applied in the `aids` dataset.
 
 ## Objectives
 
@@ -189,7 +189,7 @@ In order to ensure our methods are correct, we simulated data to test our packag
 
 First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18)$. 
 
-Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used this relation between $S(T_i)$ and the hazard to calculate the survival time. The failure time is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `AIDS` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
+Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used this relation between $S(T_i)$ and the hazard to calculate the survival time. The failure time is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `aids` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
 
 $$
 S_i(t) = \exp(-\int_0^t h_i(t) dt) = \exp\{-h_0\exp[w_i \gamma + \alpha(\beta_0 + \beta_2x_i + u_i)] \frac{\exp(\alpha \beta_1 t) - 1}{(\alpha \beta_1)}
@@ -197,7 +197,7 @@ $$
 
 Thus, we see that $T_i^* =\frac{1}{\alpha\beta_1}log[1-\frac{\alpha\beta_1\log(S_i(t))}{h_0\exp(\gamma w_i+\alpha(\beta_0+\beta_2x_i+u_i))}]$, where $\alpha = -0.2, \beta_0 = 20,\beta_1 = -1,\beta_2 = -4,\gamma = -1, h_0 = \exp(-2)$.
 
-In order to obtain a death rate close to that of the `AIDS` dataset ($40.25\%$), we simulated the censoring indicator for each individual from a random Uniform distribution, $C_i \sim Unif(0,27)$. We define the time to event as $T_i = min(T_i^*, C_i)$. Finally, we define our death indicator as $\delta_i = I(T_i^* \le C_i)$. 
+In order to obtain a death rate close to that of the `aids` dataset ($40.25\%$), we simulated the censoring indicator for each individual from a random Uniform distribution, $C_i \sim Unif(0,27)$. We define the time to event as $T_i = min(T_i^*, C_i)$. Finally, we define our death indicator as $\delta_i = I(T_i^* \le C_i)$. 
 
 For each simulation, we produce two sets of joint data: one longitudinal dataset and one survival dataset. The survival dataset consists of one row per subject with variables time to event, death indicator, and treatment group (drug). The longitudinal dataset consists of multiple observations per subject with variables response, observed time, and covariates. Subjects do not have observation times beyond the event time.
 
@@ -238,7 +238,7 @@ sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2),
 
 # Results 
 
-### Load our package `jm5` and separate AIDS dataset to longitudinal dataset and survival dataset
+### Load our package `jm5` and separate `aids` dataset to longitudinal dataset and survival dataset
 
 ```{r message=FALSE}
 library(tidyverse)
@@ -264,7 +264,7 @@ head(long.dat)
 head(surv.dat)
 ```
 
-### Summary statistics for AIDS dataset
+### Summary statistics for `aids` dataset
 
 ```{r echo=FALSE}
 va = c("ID", "Time", "death", "CD4", "obstime", "drug", "prevOI", "AZT", "gender")
@@ -351,7 +351,7 @@ ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.fa
   theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
 ```
 
-### Model fit for AIDS dataset - MCEM algorithm
+### Model fit for `aids` dataset - MCEM algorithm
 
 ```{r}
 l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
@@ -364,7 +364,7 @@ end = Sys.time()
 print(end - start)
 ```
 
-### Model fit for AIDS dataset - Bayesian method
+### Model fit for `aids` dataset - Bayesian method
 
 ```{r}
 start = Sys.time()
@@ -374,7 +374,7 @@ end = Sys.time()
 print(end - start)
 ```
 
-### RSF for AIDS dataset
+### RSF for `aids` dataset
 
 For RSF, since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data.
 
@@ -394,7 +394,7 @@ fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
 head(fit$survival[, 1:10]) ## In-bag survival function
 ```
 
-### Cross-validation: AUC and BS for AIDS dataset (MCEM, Bayesian)
+### Cross-validation: AUC and BS for `aids` dataset (MCEM, Bayesian)
 
 ```{r}
 cv.dat <- create_cv(long.dat, surv.dat) ## create 10 cv dataset repeats
@@ -452,7 +452,7 @@ mcem.auc.bs.mean
 stan.auc.bs.mean
 ```
 
-### Cross-validation: AUC and BS for AIDS dataset (RSF)
+### Cross-validation: AUC and BS for `aids` dataset (RSF)
 
 ```{r include=FALSE, message=FALSE, warning=FALSE, results=FALSE}
 ## Cross-validation: RSF
