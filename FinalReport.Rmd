@@ -53,7 +53,7 @@ We have $i=1,2, \dots, n$ subjects, $j = 1, 2,\dots, J_i$ visits for each subjec
 
 Here, $m_i(t_{ij})$ is the latent longitudinal mean at time $t_{ij}$, and $u_i$ is the random effect for each subject $i$. And $h_i(t)$ is the hazard function for subject $i$ at time $t$, and $h_0$ is the baseline hazard function.
 
-Assumption: 
+Assumptions: 
 
 $u_i \sim N(0, \sigma_u^2)$; 
 
