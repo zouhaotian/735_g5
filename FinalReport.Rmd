@@ -18,9 +18,11 @@ Data does not always fall in clear-cut categories that fit pre-specified models.
 
 For our project, we examined the `AIDS` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
 
+The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cells. Thus, the CD4 cell count decreases as HIV infection progresses. A person is diagnosed with AIDS when the CD4 count drops below 200 cells. Thus, a typical outcome of interest for an AIDS study is the CD4 cell count, and monitoring the count over time is common.
+
 ## Objectives
 
-(1). To assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance. 
+(1). To assess the association between CD4 cell count with time, adjusting for other covariates such as observed time of CD4 cell count, treatment drug, indicator of previous opportunistic infection (AIDS diagnosis) at study entry, and AZT tolerance status. 
 
 (2). To use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
 
@@ -30,13 +32,13 @@ For our project, we examined the `AIDS` dataset, which can be found in the JM pa
 
 # Methods 
 
-Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods. We are interested in seeing the accurracy and differences of these methods as well as compuational speed.
+Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods. We are interested in seeing the accuracy and differences of these methods as well as computational speed.
 
 In the sections below, we describe in detail our model and methods.
 
 ### Model specification
 
-Joint modelling framework:
+Joint modeling framework:
 $$
     Y_{ij} = m_i(t_{ij}) + \epsilon_{ij}
 $$
@@ -561,7 +563,7 @@ Advantages:
 Disadvantages:
 (1). Unstable (especially in estimation of AUC and BS);
 (2). Difficult to interpret;
-(3). No current method for joint modelling of longitudinal data and survival data
+(3). No current method for joint modeling of longitudinal data and survival data
 
 ## Future direction
 
