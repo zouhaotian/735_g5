@@ -55,15 +55,15 @@ Here, $m_i(t_{ij})$ is the latent longitudinal mean at time $t_{ij}$, and $u_i$ 
 
 Assumptions: 
 
-$u_i \sim N(0, \sigma_u^2)$; 
+* $u_i \sim N(0, \sigma_u^2)$; 
 
-$\epsilon_{ij} \sim N(0, \sigma_e^2)$; 
+* $\epsilon_{ij} \sim N(0, \sigma_e^2)$; 
 
-$Y_{ij} |u_i \perp Y_{ij'}|u_i$; 
+* $Y_{ij} |u_i \perp Y_{ij'}|u_i$; 
 
-$T_i^* \perp C_i$; 
+* $T_i^* \perp C_i$; 
 
-$\{T_i, \delta_i \} | u_i \perp Y_{ij} | u_i$.
+* $\{T_i, \delta_i \} | u_i \perp Y_{ij} | u_i$.
 
 ### Likelihood
 
