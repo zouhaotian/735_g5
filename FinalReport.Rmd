@@ -26,13 +26,13 @@ The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cel
 
 (2). To use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
 
-(3). To assess and compare the model fitting result (mean and standard error) for the frequentist and Bayesian methods. We also used Random Survival Forest for comparison. We also simulated similar data to compare the model fitting results.
+(3). To assess and compare the model fitting result (mean and standard error) for the frequentist and Bayesian methods, as well a machine learning methods. We also simulated similar data to check and compare the model fitting results.
 
 (4). To propose a dynamic prediction framework to patients with longitudinal outcomes available, such as predicting the future longitudinal outcome and conditional survival probability at a given time.
 
 # Methods 
 
-Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods. We are interested in seeing the accuracy and differences of these methods as well as computational speed.
+Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods as well. We are interested in seeing the accuracy and differences of these methods as well as computational speed.
 
 In the sections below, we describe in detail our model and methods.
 
