@@ -49,7 +49,7 @@ $$
 
 where $m_i(t_{ij}) = \beta_0 + \beta_1 t_{ij} + \boldsymbol{x_{ij}}' \boldsymbol{\beta} + u_i$, and $m_i(T_i) = \beta_0 + \beta_1 T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i$.
 
-We have $i=1,2, \dots, n$ subjects, $j = 1, 2,\dots, J_i$ visits for each subject. We observe the longitudinal outcome $Y_{ij}$ for subject i at visit j, and we observe the patient's covariate $\boldsymbol{x_{ij}}$ at time $t_{ij}$ . We also observe the event time $T_i = \text{min}(T_i^*, C_i)$, where $T_i^*$ is the actual failure time, and $C_i$ is the censoring time. We also observe the censoring indicator $\delta_i = I(T_i^*\leq C_i)$ , and covariates for survival model $\boldsymbol{w_i}$. 
+We have $i=1,2, \dots, n$ subjects, $j = 1, 2,\dots, J_i$ visits for each subject. We observe the longitudinal outcome $Y_{ij}$ for subject i at visit j, and we observe the patient's covariate $\boldsymbol{x_{ij}}$ at time $t_{ij}$ . We also observe the event time $T_i = \text{min}(T_i^*, C_i)$, where $T_i^*$ is the actual failure time, and $C_i$ is the censoring time. We also observe the event indicator $\delta_i = I(T_i^*\leq C_i)$, and covariates for survival data $\boldsymbol{w_i}$ for patient $i$. When $\delta_i = 1$, the event occurred. When $\delta_i = 0 $, the patient was censored.
 
 Here, $m_i(t_{ij})$ is the latent longitudinal mean at time $t_{ij}$, and $u_i$ is the random effect for each subject $i$. And $h_i(t)$ is the hazard function for subject $i$ at time $t$, and $h_0$ is the baseline hazard function.
 
