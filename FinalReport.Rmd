@@ -170,13 +170,13 @@ For machine learning methods, we used the random survival forest (RSF), consider
 
 For the random survival forest, we used our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
 
-Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
+Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ $(Y_{k,l}$,$Y_{k,r})$.
 
 $$
 Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
 $$
 
-The log-rank test for each split at value $c$ for a varialbe $x$ is
+The log-rank test for each split at value $c$ for a variable $x$ is
 $$
 L(x,c) = \frac{\sum\limits_{k=1}^{m} (d_{k,l} - Y_{k,l}\frac{d_k}{Y_k})}{\sqrt{\sum\limits_{k=1}^m \frac{Y_{k,l}}{Y_k} (1-\frac{Y_{k,l}}{Y_k}) (\frac{Y_k-d_k}{Y_k-1}) d_k}}
 $$
@@ -185,7 +185,7 @@ We find the c such that maximizes $|L(x,c)|$, which means the differences betwee
 
 # Data simulation
 
-In order to ensure our methods are correct, we simulated data to test our package. Our simulation set-up is as follows:
+In order to check our methods work, we simulated data to test our package. Our simulation set-up is as follows:
 
 First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18$. 
 
