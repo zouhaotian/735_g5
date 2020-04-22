@@ -111,7 +111,7 @@ We can calculate the area under curve (AUC) and Brier Score (BS) to compare the 
 
 # Details in methods
 
-we used MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
+We used MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
 
 ### MCEM algorithm
 
