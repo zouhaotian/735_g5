@@ -187,7 +187,7 @@ We find the c such that maximizes $|L(x,c)|$, which means the differences betwee
 
 In order to ensure our methods are correct, we simulated data to test our package. Our simulation set-up is as follows:
 
-First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18)$. 
+First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18$. 
 
 Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used this relation between $S(T_i)$ and the hazard to calculate the survival time. The failure time is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `aids` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
 
