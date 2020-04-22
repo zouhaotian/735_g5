@@ -393,7 +393,17 @@ s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
 head(fit$survival[, 1:10]) ## In-bag survival function
 ```
-
+```{r echo=FALSE}
+surv.dat.rsf$drugddI = as.factor(surv.dat.rsf$drugddI)
+ddI = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="1"),])
+ddC = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="0"),])
+fit.rsf = data.frame(ddI, ddC, Time = fit$time.interest) %>%
+  gather(ddI, ddC, key = drug, value = Survival)
+ggplot(fit.rsf, aes(x = Time, y = Survival, colour = drug)) +
+  geom_line() +
+  theme_light() +
+  labs(title = "Predicted survival functions for two durg groups")
+```
 ### Cross-validation: AUC and BS for `aids` dataset (MCEM, Bayesian)
 
 ```{r}
