@@ -247,7 +247,7 @@ library(devtools)
 load_all('jm5')
 ```
 
-First, we define our longitudinal formula and survival formula, and creaete separate datasets.
+First, we define our longitudinal formula and survival formula, and create separate datasets.
 
 ```{r}
 l.formula <- CD4 ~ obstime + drug + prevOI + AZT
