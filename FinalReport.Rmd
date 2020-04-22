@@ -16,7 +16,7 @@ Data does not always fall in clear-cut categories that fit pre-specified models.
 
 ## Dataset
 
-For our project, we examined the `aids` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
+For our project, we examined the `aids` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator. This data was already processed and cleaned, so we did not need to perform data cleaning.
 
 The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cells. Thus, the CD4 cell count decreases as HIV infection progresses. A person is diagnosed with AIDS when the CD4 count drops below 200 cells. Thus, a typical outcome of interest for an AIDS study is the CD4 cell count, and monitoring the count over time is common. A typical transformation of CD4 count is the square root transformation (for normality distribution), which was already applied in the `aids` dataset.
 
@@ -247,7 +247,7 @@ library(devtools)
 load_all('jm5')
 ```
 
-First, we define our longitudinal formula and survival formula, and creaete separate datasets.
+First, we define our longitudinal formula and survival formula, and create separate datasets.
 
 ```{r}
 l.formula <- CD4 ~ obstime + drug + prevOI + AZT
@@ -409,7 +409,7 @@ ggplot(fit.rsf, aes(x = Time, y = Survival, colour = drug)) +
 ```{r}
 cv.dat <- create_cv(long.dat, surv.dat) ## create 10 cv dataset repeats
 st <- c(2, 4, 6) ## starting time
-dt <- c(0.8, 1) ## prediction time window
+dt <- c(1, 1.5) ## prediction time window
 mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
 ```
@@ -448,11 +448,11 @@ for (i in 1:length(cv.dat)){
   stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
 }
 mcem.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                          dt = c(0.8, 1, 0.8, 1, 0.8, 1),
+                          dt = c(1, 1.5, 1, 1.5, 1, 1.5),
                           mcem.auc.bs.mean/length(cv.dat))
 colnames(mcem.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
 stan.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                          dt = c(0.8, 1, 0.8, 1, 0.8, 1),
+                          dt = c(1, 1.5, 1, 1.5, 1, 1.5),
                           stan.auc.bs.mean/length(cv.dat))
 colnames(stan.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
 ```
@@ -489,7 +489,7 @@ for (i in 1:length(cv.dat)){
 }
 
 RSF.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
-                         dt = c(0.8, 1, 0.8, 1, 0.8, 1),
+                         dt = c(1, 1.5, 1, 1.5, 1, 1.5),
                          RSF.auc.bs.mean/length(cv.dat))
 ```
 
@@ -571,7 +571,7 @@ Advantages:
 (2). Easy to implement
 
 Disadvantages:
-(1). Unstable (especially in estimation of AUC and BS);
+(1). Inaccurate (in estimation of AUC and BS);
 (2). Difficult to interpret;
 (3). No current method for joint modeling of longitudinal data and survival data
 
