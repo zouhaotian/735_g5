@@ -135,7 +135,7 @@ Second, we calculate $\sigma_u^{(t+1)} = \text{SD}(\boldsymbol{u})$, where $\bol
 
 Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we used MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
 
-Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t+1)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
+Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
 
 ### Bayesian methods
 
@@ -368,16 +368,18 @@ time_mcem1 = end - start
 
 We now fit the MCEM algorithm for the `aids` dataset. This method took `r round(time_mcem1,2)` minutes to run. Our parameter estimates of $\boldsymbol{\theta} = (\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma_e, \boldsymbol{\gamma}, \alpha)'$ are summarized in the table below.
 
-```{r}
-kable(mcem.result, caption = "Model Fitting Results from MCEM")
+```{r echo=FALSE}
+res.mcem = as.data.frame(t(as.matrix(mcem.result)))
+kable(res.mcem, caption = "Model Fitting Results from MCEM")
 ```
+
+It is time-consuming to run MCEM and each iteration takes more than 1 minute. Although the algorithm is hard to converge and we only run 10 iterations, the estimates is still similar with the estimates given by Bayesian method below.
 
 ### Model fit for `aids` dataset - Bayesian method
 
 ```{r}
 start = Sys.time()
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
-fit.result
 end = Sys.time()
 time_bayes1 = end - start
 ```
@@ -387,6 +389,8 @@ Meanwhile, using the Bayesian method on the `aids` dataset, we obtained our para
 ```{r}
 kable(fit.result, caption = "Model Fitting Results from Bayesian")
 ```
+
+For Bayesian method, it is easy to implement in Stan. Since we got the posterior distributions of the parameters, we can easily obtain the estimates and corresponding 95% credible intervals.
 
 ### RSF for `aids` dataset
 
