@@ -242,10 +242,10 @@ We first load our R package, `jm5`. We want to separate the `aids` dataset into 
 ### Load our `jm5` package; separate `aids` dataset
 
 ```{r message=FALSE}
-load_all('jm5')
 library(tidyverse)
 library(knitr)
 library(devtools)
+load_all('jm5')
 ```
 
 In accordance with our first two objectives, we define our longitudinal formula and survival formula, and create two separate longitudinal and survival datasets.
