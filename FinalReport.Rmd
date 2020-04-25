@@ -373,11 +373,11 @@ res.mcem = as.data.frame(t(as.matrix(mcem.result)))
 kable(res.mcem, caption = "Model Fitting Results from MCEM")
 ```
 
-It is time-consuming to run MCEM and each iteration takes more than 1 minute. Although the algorithm is hard to converge and we only run 10 iterations, the estimates is still similar with the estimates given by Bayesian method below.
+It is time-consuming to run MCEM and each iteration takes more than 1 minute. Although the algorithm is hard to converge and we only run 10 iterations, the estimates are still similar with the estimates given by Bayesian method below.
 
 ### Model fit for `aids` dataset - Bayesian method
 
-```{r}
+```{r warning=FALSE, results="hide"}
 start = Sys.time()
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
 end = Sys.time()
@@ -386,15 +386,15 @@ time_bayes1 = end - start
 
 Meanwhile, using the Bayesian method on the `aids` dataset, we obtained our parameter estimates in only `r round(time_bayes1,2)` minutes. This is `r time_mcem1 - time_bayes1` minutes faster than MCEM. Our parameter estimates of are summarized in the table below.
 
-```{r}
-kable(fit.result, caption = "Model Fitting Results from Bayesian")
+```{r echo=FALSE}
+kable(fit.result[1:10,1:8], caption = "Model Fitting Results from Bayesian")
 ```
 
-For Bayesian method, it is easy to implement in Stan. Since we got the posterior distributions of the parameters, we can easily obtain the estimates and corresponding 95% credible intervals.
+It is easy to implement Bayesian method in Stan. Since we got the posterior distributions of the parameters, we can easily obtain the estimates and corresponding 95% credible intervals, which gave similar results with MCEM method.
 
-### RSF for `aids` dataset
+### Random Survival Forest for `aids` dataset
 
-For RSF, since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data.
+For Random Survival Forest (RSF), since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data and run the algorithm to obtain the predicted survival probability of each subject.
 
 ```{r}
 nearestCD4 = long.dat %>%
@@ -409,8 +409,8 @@ s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 
 ```{r}
 fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
-head(fit$survival[, 1:10]) ## In-bag survival function
 ```
+
 ```{r echo=FALSE}
 surv.dat.rsf$drugddI = as.factor(surv.dat.rsf$drugddI)
 ddI = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="1"),])
@@ -422,6 +422,8 @@ ggplot(fit.rsf, aes(x = Time, y = Survival, colour = drug)) +
   theme_light() +
   labs(title = "Predicted survival functions for two drug groups")
 ```
+
+The average survival curves for the two drug groups shows that the survival probabilities of group ddI and ddC are very close to each other at early stages. However, the survival probability of group ddC will be overall higher that group ddI later, which implies that the effect of ddC is better than ddI.
 
 ### Cross-validation: AUC and BS for `aids` dataset (MCEM, Bayesian)
 
