@@ -135,7 +135,7 @@ Second, we calculate $\sigma_u^{(t+1)} = \text{SD}(\boldsymbol{u})$, where $\bol
 
 Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we used MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
 
-Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
+Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t+1)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
 
 ### Bayesian methods
 
