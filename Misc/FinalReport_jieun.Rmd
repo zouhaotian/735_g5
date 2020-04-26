@@ -1,6 +1,6 @@
 ---
-title: "BIOS735 Final Report"
-author: "Group 5"
+title: "BIOS735 Final Project Report"
+author: "Group 5: Ji-Eun Park, Yueqi Shen, Jianqiao Wang, Yangjianchen Xu, Christina Zhou, Haotian Zou"
 date: "4/27/2020"
 output:
   html_document:
@@ -10,51 +10,35 @@ output:
       smooth_scroll: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-```
-
-# NOTES
-Aim for Introduction to the dataset and the question, a Methods section with any important pre-processing etc., three sections of Results (which may also contain some method details), and Discussion about interpretation or possible future directions. 
-
-\
-
-Introduction\
-
-Project Aims\
-Data description\
-Methods\
--Processing the data\
--Model\
--3 things we plan to do (bayesian, MCEM, random survival forest)\
-Results\
--3 things we plan to do (bayesian, MCEM, random survival forest)\
-Discussion\
-
 # Introduction
 
-The dataset we will examine for our project can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator.
+Data does not always fall in clear-cut categories that fit pre-specified models. For example, collected data could be longitudinal and time-to-event. It would be inaccurate to only fit a longitudinal model or only fit a survival model. Previous studies (Ye at al, 2017) have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates, thus a joint model may be preferred to a two-step approach. For joint modeling, previous literature (Serrat et al, 2015) suggests that Bayesian methods are efficient and computationally easier. In the history of statistics, an interest in comparing frequentist versus Bayesian methods has been prominent. Thus, for our project, we aim to analyze data using a joint model approach to compare frequentist, Bayesian, and machine learning methods.
 
-Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. A joint model is preferred to a two-step approach since previous studies have shown that the two-step approach may reduce efficacy which in turn inflates standard errors of estimates. For joint modelling, previous literature suggests that Bayesian methods are more efficient and computationally easier.
+## Dataset
 
-# Aims
+For our project, we examined the `aids` dataset, which can be found in the JM package in R. This data is from a randomized clinical trial (RCT) examining two treatments in HIV patients. It contains both longitudinal and survival data on 467 patients who failed or were intolerant of zidovudine (AZT) therapy. These treatment groups of the RCT are two anti-retroviral drugs: zalcitabine and didanosine. The dataset contains a total of 1405 observations and 9 variables: patient identifier, time to death or censoring, death indicator, CD4 cell count, time points at which the CD4 cells count were recorded, treatment indicator, gender indicator, previous opportunistic infection (AIDS diagnosis) at study entry indicator, and AZT tolerance indicator. This data was already processed and cleaned, so we did not need to perform data cleaning.
 
-Our study aims are as follows:
+The HIV virus kills CD4 cells, which has a normal range of about 500 to 1500 cells. Thus, the CD4 cell count decreases as HIV infection progresses. A person is diagnosed with AIDS when the CD4 count drops below 200 cells. Thus, a typical outcome of interest for an AIDS study is the CD4 cell count, and monitoring the count over time is common. The standard transformation of CD4 count is the square root transformation (for normality distribution), which was already applied in the `aids` dataset. We present descriptive statistics of these variables in our Results section below.
 
-(1). We will assess the association between CD4 cell count with time, adjusting for other covariates such as obstime, drug, gender, prevOI (indicator of previous opportunistic infection (AIDS diagnosis) at study entry), and AZT tolerance. We don't include the gender covariate, because more than 90% of subjects are Male, which leads to power loss when estimating gender coefficient.
+## Project Objectives
 
-(2). We will use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
+(1). To assess the association between CD4 cell count with time, adjusting for other covariates such as observed time of CD4 cell count, treatment drug, indicator of previous opportunistic infection (AIDS diagnosis) at study entry, and AZT tolerance status. 
 
-(3). We will assess and compare the model fitting result (mean and standard error) for the MCEM method and Bayesian method. We will also try Random Survival Forest. We will also do a simulation to compare the model fitting result.
+(2). To use the joint model to assess the association between survival outcome (death status and event time) with the drug efficacy and the latent mean of CD4 count at event time.
 
-(4). We will also propose a dynamic prediction framework to patients with some longitudinal outcomes available, for predicting the future longitudinal outcome and conditional survival probability at a given time.
+(3). To assess and compare the model fitting result (mean and standard error) for the frequentist and Bayesian methods, as well a machine learning methods. We also simulated similar data to check and compare the model fitting results.
+
+(4). To propose a dynamic prediction framework to patients with longitudinal outcomes available, such as predicting the future longitudinal outcome and conditional survival probability at a given time.
 
 # Methods 
 
+Since this dataset contains both longitudinal and survival data, we proposed a joint model to simultaneously capture the random effects from the longitudinal data and to estimate the parameters of the survival model. We compare frequentist methods to Bayesian methods by performing analysis on aims with Monte-Carlo EM (MCEM), Bayesian methods, and finally random survival forest (RSF) to compare to machine learning methods as well. We are interested in seeing the accuracy and differences of these methods as well as computational speed.
+
+In the sections below, we describe in detail our model and methods.
+
 ### Model specification
 
-Joint modelling framework:
+Joint modeling framework:
 $$
     Y_{ij} = m_i(t_{ij}) + \epsilon_{ij}
 $$
@@ -65,21 +49,21 @@ $$
 
 where $m_i(t_{ij}) = \beta_0 + \beta_1 t_{ij} + \boldsymbol{x_{ij}}' \boldsymbol{\beta} + u_i$, and $m_i(T_i) = \beta_0 + \beta_1 T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i$.
 
-We have $i=1,2, \dots, n$ subjects, $j = 1, 2,\dots, J_i$ visits for each subject. We observe the longitudinal outcome $Y_{ij}$ for subject i at visit j, and we observe the patient's covariate $\boldsymbol{x_{ij}}$ at time $t_{ij}$ . We also observe the event time $T_i = \text{min}(T_i^*, C_i)$, where $T_i^*$ is the actual failure time, and $C_i$ is the censoring time. We also observe the censoring indicator $\delta_i = I(T_i^*\leq C_i)$ , and covariates for survival model $\boldsymbol{w_i}$. 
+We have $i=1,2, \dots, n$ subjects, $j = 1, 2,\dots, J_i$ visits for each subject. We observe the longitudinal outcome $Y_{ij}$ for subject i at visit j, and we observe the patient's covariate $\boldsymbol{x_{ij}}$ at time $t_{ij}$ . We also observe the event time $T_i = \text{min}(T_i^*, C_i)$, where $T_i^*$ is the actual failure time, and $C_i$ is the censoring time. We also observe the event indicator $\delta_i = I(T_i^*\leq C_i)$, and covariates for survival data $\boldsymbol{w_i}$ for patient $i$. When $\delta_i = 1$, the event occurred. When $\delta_i = 0 $, the patient was censored.
 
 Here, $m_i(t_{ij})$ is the latent longitudinal mean at time $t_{ij}$, and $u_i$ is the random effect for each subject $i$. And $h_i(t)$ is the hazard function for subject $i$ at time $t$, and $h_0$ is the baseline hazard function.
 
-Assumption: 
+Assumptions: 
 
-$u_i \sim N(0, \sigma_u^2)$; 
+* $u_i \sim N(0, \sigma_u^2)$; 
 
-$\epsilon_{ij} \sim N(0, \sigma_e^2)$; 
+* $\epsilon_{ij} \sim N(0, \sigma_e^2)$; 
 
-$Y_{ij} |u_i \perp Y_{ij'}|u_i$; 
+* $Y_{ij} |u_i \perp Y_{ij'}|u_i$; 
 
-$T_i^* \perp C_i$; 
+* $T_i^* \perp C_i$; 
 
-$\{T_i, \delta_i \} | u_i \perp Y_{ij} | u_i$.
+* $\{T_i, \delta_i \} | u_i \perp Y_{ij} | u_i$.
 
 ### Likelihood
 
@@ -123,11 +107,11 @@ $$
     P(T_{i'}>T' | T_{i'}>T) = S_{i'}(T' |  \boldsymbol{\hat \theta}, u_{i'}^{(d)})/S_{i'}(T  | \boldsymbol{\hat \theta}, u_{i'}^{(d)})
 $$
 
-We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy. We will compare the model estimates, standard error, computation speed, and prediction accuracy. We will use cross-validation to check prediction accuracy.
+We can calculate the area under curve (AUC) and Brier Score (BS) to compare the prediction accuracy. We will compare the model estimates, standard error, computation speed, and prediction accuracy. We used cross-validation with 3:1 ratio to check prediction accuracy.
 
 # Details in methods
 
-We use MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
+We used MCEM algorithm, Bayesian methods, and Random Survival Forest to estimate parameters.
 
 ### MCEM algorithm
 
@@ -143,21 +127,21 @@ where $$l_i(\theta | Y_i, T_i) = \sum_{j=1}^{J_i} \log P(Y_{ij}|\theta, u_i) + \
 
 $$f(u_i | \theta^{(t)}, Y_i, T_i) \propto \prod_{j=1}^{j_i} P(Y_{ij} |u_i, \boldsymbol{\theta^{(t)}}) h_i(T_i | \theta^{(t)})^{\delta_i}S_i(T_i | \theta^{(t)}) P(u_{i} | \boldsymbol{ \theta^{(t)}})$$.
 
-We will use the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method.
+We used the Metropolis Hastings Algorithm with a random walk to draw the samples of random effect and calculate the integral by Monte Carlo method.
 
 After we sample $M$ random effect for each subject, we get the augmented longitudinal dataset and survival dataset.
 
 Second, we calculate $\sigma_u^{(t+1)} = \text{SD}(\boldsymbol{u})$, where $\boldsymbol{u}$ is a vector of random effects for all subjects. We calculate $\sigma_e^{(t+1)}$ by simply fitting a linear model using augmented longitudinal dataset, treating $\boldsymbol{u}$ as the offset.
 
-Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we use MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
+Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we used MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
 
-Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
+Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t+1)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
 
 ### Bayesian methods
 
-We will use Stan to perform sampling, where we will use No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).
+We used Stan to perform sampling, where We used No-U-Turn Sampler (NUTS), based on Hamiltonian Monte Carlo (HMC).
 
-We will use normal prior distributions for $\beta$..., and inverse Gamma prior distributions for the variance parameters. We will use the following prior distribution for the parameters for Bayesian methods:
+We used normal prior distributions for $\beta$..., and inverse Gamma prior distributions for the variance parameters. We used the following prior distribution for the parameters for Bayesian methods:
 
 (1) $\beta \sim N(0, 10^2)$.
 
@@ -179,52 +163,105 @@ To get initial values of $\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma
 
 To get initial values of $\log(h_0), \gamma, \alpha$, we fit an AFT model with exponential distribution, where the latent longitudinal mean is calculated at the event time for each subject. We extract the estimated intercept and coefficients, and take negative as initial values of $\log(h_0), \gamma, \alpha$.
 
-
 ### RSF
 
-For machine learning methods: We used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where we will use the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
+For machine learning methods, we used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where We used the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
 
-For the random survival forest, we use our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
+For the random survival forest, we used our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
 
-Here we use the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 and drug(ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ ($Y_{k,l}$,$Y_{k,r}$.
+Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}, d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ $(Y_{k,l}, Y_{k,r})$.
 
 $$
 Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
 $$
 
-The log-rank test for each split at value $c$ for a varialbe $x$ is
+The log-rank test for each split at value $c$ for a variable $x$ is
 $$
 L(x,c) = \frac{\sum\limits_{k=1}^{m} (d_{k,l} - Y_{k,l}\frac{d_k}{Y_k})}{\sqrt{\sum\limits_{k=1}^m \frac{Y_{k,l}}{Y_k} (1-\frac{Y_{k,l}}{Y_k}) (\frac{Y_k-d_k}{Y_k-1}) d_k}}
 $$
 
-We find the c such that maximizes $|L(x,c)|$, which means thhe differences between the two nodes are maximized.
+We find the c such that maximizes $|L(x,c)|$, which means the differences between the two nodes are maximized.
 
+# Data simulation
 
-# Simulation
+In order to check our methods work, we simulated data to test our package. Our simulation set-up is as follows:
 
-To ensure correctness of our methods, we use the simulation set-up as follows:
+First, we simulated the longitudinal responses based on the estimated values from the original `aids` data using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18$. 
 
-First, we simulate the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$. 
-
-Second, we simulate N random uniform distribution, which corresponds to the survival probability. And we calculate the failure time as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. And we can calculate the survival time $T_i^*$ using following formula:
+Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used the relation between $S(T_i)$ and the hazard to calculate the survival time. The hazard is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `aids` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
 
 $$
-S_i(t) = \exp(-\int_0^t h_i(t) dt) = \exp\{-h_0\exp[w_i \gamma + \alpha(\beta_0 + \beta_2*x_i + u_i)] [\exp(\alpha \beta_1 t) - 1]/(\alpha \beta_1)\}
+S_i(t) = \exp(-\int_0^t h_i(t) dt) = \exp\{-h_0\exp[w_i \gamma + \alpha(\beta_0 + \beta_2x_i + u_i)] \frac{\exp(\alpha \beta_1 t) - 1}{(\alpha \beta_1)}
 $$
 
-We simulate N=500 subjects, and time points as (0, 2, 6, 12, 18) as similar as the `aids` data in the longitudinal model, and another 200 subjects as the testing dataset.
+Thus, we see that $T_i^* =\frac{1}{\alpha\beta_1}log[1-\frac{\alpha\beta_1\log(S_i(t))}{h_0\exp(\gamma w_i+\alpha(\beta_0+\beta_2x_i+u_i))}]$, where $\alpha = -0.2, \beta_0 = 20,\beta_1 = -1,\beta_2 = -4,\gamma = -1, h_0 = \exp(-2)$.
+
+In order to obtain a death rate close to that of the `aids` dataset ($40.25\%$), we simulated the censoring indicator for each individual from a random Uniform distribution, $C_i \sim Unif(0,27)$. We define the time to event as $T_i = min(T_i^*, C_i)$. Finally, we define our death indicator as $\delta_i = I(T_i^* \le C_i)$. 
+
+For each simulation, we produce two sets of joint data: one longitudinal dataset and one survival dataset. The survival dataset consists of one row per subject with variables time to event, death indicator, and treatment group (drug). The longitudinal dataset consists of multiple observations per subject with variables response, observed time, and covariates. Subjects do not have observation times beyond the event time.
+
+We simulated datasets of 700 subjects, with 500 subjects for the training dataset and 200 subjects for the testing dataset.
+
+# Software implementation
+
+We write our package `jm5`. Here are the main functions:
+
+```{r eval=FALSE}
+jm_filter <- function(l.formula, s.formula, dat, ID){}
+
+MCEM <- function(l.formula, s.formula, long.dat, surv.dat, 
+                 max.iter = 30, tol = 1e-3, seed = 123, 
+                 progress = TRUE){}
+
+fit_stan <- function(l.formula, s.formula, long.dat, surv.dat,
+                     n.iter = 2000, 
+                     n.burnin = floor(n.iter/2),
+                     seed = 123,
+                     progress = TRUE){}
+
+RandomSurvivalForest = function(surv.dat, s.formula, ntree=100,seed=12,...)  {}
+
+create_cv <- function(long.dat, surv.dat, ratio = 3, reps = 10, seed = 123){}
+
+calc_AUC_BS <- function(l.formula, s.formula, long.test, surv.test, 
+                        Tstart, Tstop, summary.mean, seed = 123){}
+
+calc_AUC_BS_RSF <- function(surv.test2, Tstart, Tstop, res){}
+
+SimulateDataset = function(n.train = 500, n.test = 200, seed){}
+
+sim.MCEM = function(sim.num = 10, max.iter = 30, tol = 1e-3, seed = 123, progress = TRUE){}
+
+sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2), seed = 123, progress = TRUE){}
+```
+
++ `jm_filter`: Function that generates the longitudinal and survival data we need to run our three methods. 
+
++ `MCEM`, `fit_stan`, `RandomSurvivalForest`: Main functions that applies to our three methods MCEM, Bayesian, and random survival forest, respectively.
+
++ `create_cv`: Function that generates cross-validation data from our original data. Used when generating AUC and Brier Score.
+
++ `cal_AUC_BS`, `calc_AUC_BS_RSF`: Functions that generate AUC and BS calculation for MCEM, Bayesian and RSF.
+
++ `SimulateDataset`: Function that generates simulation data
+
++ `sim.MCEM`, `sim.Bayesian`: Functions that generate simulated datasets to check if functions for each method runs correctly.
+
 
 # Results 
 
-### Load our package `jm5` and separate AIDS dataset to longitudinal dataset and survival dataset
+We first load our R package, `jm5`. We want to separate the `aids` dataset into its corresponding longitudinal and survival components. 
 
-```{r}
+### Load our `jm5` package; separate `aids` dataset
+
+```{r message=FALSE}
+load_all('jm5')
+library(tidyverse)
 library(knitr)
 library(devtools)
-load_all('jm5')
 ```
 
-Define our longitudinal formula and survival formula, and separate datasets
+In accordance with our first two objectives, we define our longitudinal formula and survival formula, and create two separate longitudinal and survival datasets.
 
 ```{r}
 l.formula <- CD4 ~ obstime + drug + prevOI + AZT
@@ -235,33 +272,138 @@ long.dat <- l[[1]]
 surv.dat <- l[[2]]
 ```
 
-Head of longitudinal dataset and survival dataset
+Below are the top 6 observations of the longitudinal and survival datasets.
 ```{r}
-head(long.dat)
-head(surv.dat)
+kable(head(long.dat), caption = "First 6 observations of longitudinal AIDS dataset")
+kable(head(surv.dat), caption = "First 6 observations of survival AIDS dataset")
 ```
 
-### Summary statistics for AIDS dataset
+### Summary statistics for `aids` dataset
 
-```{r}
-
+```{r echo=FALSE}
+va = c("ID", "Time", "death", "CD4", "obstime", "drug", "prevOI", "AZT", "gender")
+desc = c("Patients identifier (1-467)",
+         "The time to death or censoring",
+         "0 for censoring, 1 for death",
+         "The CD4 cells count",
+         "The time points at which the CD4 cells count was recorded (0, 2, 6, 12, 18)",
+         "ddI (1) for didanosine, ddC (0) for zalcitabine",
+         "AIDS (1) for previous opportunistic infection, noAIDS (0) for no previous infection",
+         "failure (1) for AZT failure, intolerance (0) for AZT intolerance",
+         "1 for male, 0 for female"
+         )
+summary_stat = data.frame(Variable = va, Description = desc)
+kable(summary_stat)
 ```
 
-### Model fit for AIDS dataset - MCEM algorithm
+```{r echo=FALSE, out.width='50%'}
+summ = JM::aids[,c(1,3:9)] %>%
+  spread(key = obstime, value = CD4)
+summ = summ[,2:6]
+summ$drug = ifelse(summ$drug == "ddI", 1, 0)
+summ$gender = ifelse(summ$gender == "male", 1, 0)
+summ$prevOI = ifelse(summ$prevOI == "AIDS", 1, 0)
+summ$AZT = ifelse(summ$AZT == "failure", 1, 0)
+summ = gather(summ, death, drug, gender, prevOI, AZT,
+              key = "variables", value = "count")
+ggplot(summ, aes(variables)) +
+  geom_bar(aes(fill = as.factor(count))) +
+  theme_light() +
+  labs(x = "Variable",
+       y = "Count",
+       title = "Summary plot for dichotomous variables") +
+  scale_fill_discrete(name = NULL,
+                      labels = c("intolerance/censoring/ddC/female/noAIDS",
+                                 "failure/death/ddI/male/AIDS")) +
+  theme(legend.position="top")
 
-```{r}
-
+ggplot(surv.dat, aes(x = as.factor(ifelse(death == 0, "Censoring", "Death")), y = Time, fill = as.factor(drugddI))) +
+  geom_boxplot() +
+  labs(x = c("Status"),
+       y = "Time to death or censoring",
+       title = "Summary plot for survival part") +
+  scale_fill_discrete(name = "drug",
+                      labels = c("ddC","ddI")) +
+  theme_light() +
+  theme(legend.position="top")
 ```
 
-### Model fit for AIDS dataset - Bayesian method
+Since more than 90% of subjects are male, we do not include the gender covariate for the first aim. The gender inbalance leads to power loss when estimating the gender coefficient. We can see that the other variables are relatively balanced.
 
-```{r}
+```{r echo=FALSE, out.width='33.33%'}
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(prevOIAIDS))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "prevOI",
+                       labels = c("no AIDS", "AIDS")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by prevOI)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
 
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(drugddI))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "drug",
+                       labels = c("ddC", "ddI")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by drug)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
+
+ggplot(long.dat, aes(x = obstime, y = CD4, group = as.factor(ID), colour = as.factor(AZTfailure))) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0,2,6,12,18)) +
+  scale_color_discrete(name = "AZT",
+                       labels = c("tolerance", "intolerance")) +
+  labs(y = "CD4 cell counts",
+       x = "Observation time",
+       title = "Summary plot for longitudinal part (grouped by AZT)") +
+  theme_light() +
+  theme(legend.justification=c(0.98,0.99), legend.position=c(0.98,0.99))
 ```
 
-### RSF for AIDS dataset
+The spaghetti plots presented here show the progression of CD4 cell count over time grouped by different variables. We note that most subjects only have observation times to month 12.
 
-For RSF, since we used the CD4 count nearest to death as a covariate as well, we add this variable to our survival data.
+### Model fit for `aids` dataset - MCEM algorithm
+
+```{r, results = "hide"}
+l.formula2 <- CD4 ~ obstime + drugddI + prevOIAIDS + AZTfailure
+s.formula2 <- Surv(Time, death) ~ drugddI
+
+start = Sys.time()
+mcem.result <- MCEM(l.formula2, s.formula2, long.dat, surv.dat, max.iter = 10)
+end = Sys.time()
+time_mcem1 = end - start
+```
+
+We now fit the MCEM algorithm for the `aids` dataset. This method took `r round(time_mcem1,2)` minutes to run. Our parameter estimates of $\boldsymbol{\theta} = (\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma_e, \boldsymbol{\gamma}, \alpha)'$ are summarized in the table below.
+
+```{r}
+kable(mcem.result, caption = "Model Fitting Results from MCEM")
+```
+
+### Model fit for `aids` dataset - Bayesian method
+
+```{r}
+start = Sys.time()
+fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
+fit.result
+end = Sys.time()
+time_bayes1 = end - start
+```
+
+Meanwhile, using the Bayesian method on the `aids` dataset, we obtained our parameter estimates in only `r round(time_bayes1,2)` minutes. This is `r time_mcem1 - time_bayes1` minutes faster than MCEM. Our parameter estimates of are summarized in the table below.
+
+```{r}
+kable(fit.result, caption = "Model Fitting Results from Bayesian")
+```
+
+### RSF for `aids` dataset
+
+For RSF, since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data.
 
 ```{r}
 nearestCD4 = long.dat %>%
@@ -274,75 +416,213 @@ surv.dat.rsf = merge(surv.dat, nearestCD4, by="ID")
 s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 ```
 
-With the new formula and dataset, we fit the random survival forest.
-
 ```{r}
 fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
+head(fit$survival[, 1:10]) ## In-bag survival function
+```
+```{r echo=FALSE}
+surv.dat.rsf$drugddI = as.factor(surv.dat.rsf$drugddI)
+ddI = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="1"),])
+ddC = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="0"),])
+fit.rsf = data.frame(ddI, ddC, Time = fit$time.interest) %>%
+  gather(ddI, ddC, key = drug, value = Survival)
+ggplot(fit.rsf, aes(x = Time, y = Survival, colour = drug)) +
+  geom_line() +
+  theme_light() +
+  labs(title = "Predicted survival functions for two drug groups")
+```
 
-head(fit$predicted)[1:5] ## predicted value for each patient
+### Cross-validation: AUC and BS for `aids` dataset (MCEM, Bayesian)
+
+We now perform cross-validation for MCEM and Bayesian methods to calculate AUS and BS for the `aids` dataset.
+
+```{r}
+cv.dat <- create_cv(long.dat, surv.dat) ## create 10 cv dataset repeats
+st <- c(2, 4, 6) ## starting time
+dt <- c(1, 1.5) ## prediction time window
+mcem.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+stan.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+```
+
+```{r include=FALSE, message=FALSE, warning=FALSE, results=FALSE}
+for (i in 1:length(cv.dat)){
+  ## training data and testing data
+  long.train <- cv.dat[[i]][[1]]
+  long.test <- cv.dat[[i]][[2]]
+  surv.train <- cv.dat[[i]][[3]]
+  surv.test <- cv.dat[[i]][[4]]
+  
+  ## run MCEM and Stan on training dataset
+  mcem.train.mean <- MCEM(l.formula2, s.formula2, long.train, surv.train, max.iter = 10, progress = TRUE)
+  stan.train <- fit_stan(l.formula2, s.formula2, long.train, surv.train, progress = TRUE)
+  stan.train.mean <- stan.train[-nrow(stan.train), 1]
+  
+  ## Calculate AUC and BS ##
+  mcem.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  stan.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  index <- 0
+  for (Tstart in st){
+    for (Tdelta in dt){
+      index <- index + 1
+      mcem.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
+                                          long.test, surv.test,
+                                          Tstart, Tstart+Tdelta, 
+                                          mcem.train.mean)
+      stan.auc.bs[index, ] <- calc_AUC_BS(l.formula2, s.formula2, 
+                                          long.test, surv.test,
+                                          Tstart, Tstart+Tdelta, 
+                                          stan.train.mean)
+    }
+  }
+  mcem.auc.bs.mean <- mcem.auc.bs.mean + mcem.auc.bs
+  stan.auc.bs.mean <- stan.auc.bs.mean + stan.auc.bs
+}
+mcem.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                          dt = c(1, 1.5, 1, 1.5, 1, 1.5),
+                          mcem.auc.bs.mean/length(cv.dat))
+colnames(mcem.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
+stan.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                          dt = c(1, 1.5, 1, 1.5, 1, 1.5),
+                          stan.auc.bs.mean/length(cv.dat))
+colnames(stan.auc.bs.mean) <- c('starting.time', 'prediction.window', 'Est.AUC', 'Est.BS')
 ```
 
 ```{r}
-head(fit$survival)[,1:10] ## In-bag survival function
+kable(mcem.auc.bs.mean, caption = "Means of AUC and BS from MCEM")
+kable(stan.auc.bs.mean, caption = "Means of AUC and BS from Bayesian")
+```
+
+### Cross-validation: AUC and BS for `aids` dataset (RSF)
+
+```{r include=FALSE, message=FALSE, warning=FALSE, results=FALSE}
+## Cross-validation: RSF
+RSF.auc.bs.mean <- matrix(0, length(st)*length(dt), 2)
+for (i in 1:length(cv.dat)){
+  ## training data and testing data
+  surv.train <- cv.dat[[i]][[3]]
+  surv.test <- cv.dat[[i]][[4]]
+  surv.train2 = left_join(surv.train, nearestCD4, by="ID")
+  surv.test2 = left_join(surv.test, nearestCD4, by="ID")
+  
+  fit = RandomSurvivalForest(surv.train2, s.formula.rsf)
+  res = predict(fit, newdata = surv.test2)
+  
+  RSF.auc.bs <- matrix(NA, length(st)*length(dt), 2)
+  index <- 0
+  for (Tstart in st){
+    for (Tdelta in dt){
+      index <- index + 1
+      RSF.auc.bs[index, ] <- calc_AUC_BS_RSF(surv.test2, Tstart, Tstart + Tdelta, res)
+    }
+  }
+  RSF.auc.bs.mean <- RSF.auc.bs.mean + RSF.auc.bs
+}
+
+RSF.auc.bs.mean <- cbind(st = c(2, 2, 4, 4, 6, 6), 
+                         dt = c(1, 1.5, 1, 1.5, 1, 1.5),
+                         RSF.auc.bs.mean/length(cv.dat))
 ```
 
 ```{r}
-library(randomForestSRC)
-plot.survival(fit) ## generates Survival plots
-```
-
-
-### Cross-validation: AUC and BS for AIDS dataset (MCEM, Bayesian)
-
-```{r}
-
-```
-
-### Cross-validation: AUC and BS for AIDS dataset (RSF)
-
-```{r}
-cv.dat <- create_cv(long.dat, surv.dat)
-surv.train2 = left_join(cv.dat[[2]]$surv.train, nearestCD4, by="ID")
-surv.test2 = left_join(cv.dat[[2]]$surv.test, nearestCD4, by="ID")
-
-fit = RandomSurvivalForest(surv.train2, s.formula.rsf)
-res = predict(fit, newdata = surv.test2)
-res$err.rate[!is.na(res$err.rate)] ## prediction error rate
-
-## AUC
-## BS
+kable(RSF.auc.bs.mean, caption = "Means of AUC and BS from RSF")
 ```
 
 ### Simulation: evaluate correctness of MCEM and Bayesian methods
 
-```{r}
+Using our simulation function from the R package, we can check the methods. We create 10 independent simulated datasets per method.
 
+MCEM method results:
+```{r message=FALSE, warning=FALSE, results=FALSE}
+## Simulation for MCEM
+simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
 ```
 
-### Simulation: estimated AUC, true AUC and estimated BS (MCEM and Bayesian)
-
 ```{r}
-
+kable(simulation.MCEM, caption = "MCEM Simulation Results")
 ```
 
-### Simulation: estimated AUC, true AUC and estimated BS (RSF)
+Bayesian method results:
 
-```{r}
+```{r message=FALSE, warning=FALSE, results=FALSE}
+simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```
 
-
+```{r}
+kable(simulation.Bayesian, caption = "Bayesian Simulation Results")
+```
 
 # Discussion
 
-# Future direction
+In summary, we found that Bayesian methods ran quicker than frequentist methods (MCEM). The parameter estimates and SDs from all three methods were similar but not quite the same. For cross-validation analysis, the estimated BS were very similar for the MCEM and Bayesian methods. Additionally, our package for all three methods ran successfully with the simulated data.
+
+## Main conclusion from MCEM and Bayesian results
+
+(1). At baseline, the expected value of CD4 count is 10.2 (9.43, 10.9), for a AZT-intolerant patient receiving zalcitabine with no previous AIDS diagnosis at study entry.
+
+(2). The expected change of CD4 count was -0.17 (-0.19, -0.15) when the observed time increased by one month, for the same patient.
+
+(3). When a patient is treated with didanosine, his expected CD4 count will be higher compared with another patient treated with zalcitabine, given the same observed time, previous AIDS diagnosis, AZT tolerance status, and random effect: : 0.45 (-0.32, 1.20).
+
+(4). When a patient has previous opportunistic infection (AIDS diagnosis) at study entry, his/her expected CD4 count will be lower, compared with another patient without previous infection, given the same observed time, treatment drug, AZT tolerance status and random effect: -4.71 (-5.68, -3.74).
+
+(5). When a patient has AZT failure, his expected CD4 count will be lower, compared with another AZT-intolerant patient, given the same observed time, treatment drug, AIDS diagnosis and random effect: -0.31 (-1.27, 0.60).
+
+(6). The log hazard ratio for patients with drug didanosine vs. zalcitabine is estimated to be 0.31 (0.02, 0.60), given same latent CD4 cell count over time, indicating didanosine may increase CD4 count by having more severe side effects than zalcitabine.
+
+(7). The latent CD4 count is negatively associated with hazard function. The estimated log hazard ratio is -0.28 (-0.35, -0.22).
+
+## Limitations
+
+Below are some advantages and disadvanges of the three methods.
+
+### MCEM algorithm
+
+Advantages: 
+(1). Likelihood-based method, therefore robust and consistent; 
+(2). Fairly stable
+
+Disadvantages:
+(1). Computationally intensive, especially for M-step;
+(2). Difficult to implement
+
+### Bayesian method
+
+Advantages:
+(1). Likelihood-based method, therefore robust and consistent;
+(2). Fast computational speed;
+(3). Easy to implement
+
+Disadvantages:
+(1). Credible interval isn't necessarily equal to confidence interval;
+(2). Depends on prior
+
+### RSF
+
+Advantages:
+(1). Extremely fast speed;
+(2). Easy to implement
+
+Disadvantages:
+(1). Inaccurate (in estimation of AUC and BS);
+(2). Difficult to interpret;
+(3). No current method for joint modeling of longitudinal data and survival data
+
+## Future direction
+
+For MCEM method, it is very hard to directly optimize the objective function in M-step. One possible way is to approximate the objective function by Taylor expansion and find a majorization function. 
+
+Moreover, we can generalize the baseline hazard function into a non-constant function $h_0(t)$. This will convert our model into a semi-parametric model. One simple way is to approximate baseline hazard function by step function.
+
+As for machine learning methods, there is no existing method to jointly model longitudinal data and survival data. One way is to construct neural networks. We first construct neural networks to model the longitudinal mean. With predicted longitudinal mean, we model survival data with neural networks. To avoid two-step estimation, loss functions for two neural networks can be minimized jointly, which, however, may require more data to converge. Another way is to apply offline reinforcement learning. In this setting, we can treat the drug as action and survival status at different time as state.
 
 # References 
 
-Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42.
+1. Li, Kan, and Sheng Luo. “Dynamic Predictions in Bayesian Functional Joint Models for Longitudinal and Time-to-Event Data: An Application to Alzheimer’s Disease.” Statistical Methods in Medical Research 28, no. 2 (2017): 327–42. https://doi.org/10.1177/0962280217722177
 
-https://doi.org/10.1177/0962280217722177
+2. Ye and Wu. "Two-step and likelihood methods for joint models of longitudinal and survival data." Communications in Statistics - Simulation and Computation Vol 46, Issue 8 (2017): 6019-6033. https://doi.org/10.1080/03610918.2016.1188208
 
-http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
+3. Serrat et al. "Frequentist and Bayesian approaches for a joint model for prostate cancer risk and longitudinal prostate-specific antigen data." Journal of Applied Statistics: 42(6). https://www.tandfonline.com/doi/abs/10.1080/02664763.2014.999032
 
-http://www.drizopoulos.com/vignettes/dynamic_predictions
+4. Vignette: http://www.drizopoulos.com/vignettes/multivariate\%20joint\%20models
 
+5. Vignette: http://www.drizopoulos.com/vignettes/dynamic_predictions
