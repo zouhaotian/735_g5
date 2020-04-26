@@ -163,7 +163,7 @@ To get initial values of $\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma
 
 To get initial values of $\log(h_0), \gamma, \alpha$, we fit an AFT model with exponential distribution, where the latent longitudinal mean is calculated at the event time for each subject. We extract the estimated intercept and coefficients, and take negative as initial values of $\log(h_0), \gamma, \alpha$.
 
-### RSF
+### Random Survival Forest
 
 For machine learning methods, we used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where We used the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
 
@@ -524,7 +524,7 @@ kable(RSF.auc.bs.mean, caption = "Means of AUC and BS from RSF")
 
 Using our simulation function from the R package, we can check the methods. We create 10 independent simulated datasets per method.
 
-MCEM method results:
+#### MCEM method results
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 ## Simulation for MCEM
 simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
@@ -534,7 +534,9 @@ simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
 kable(simulation.MCEM, caption = "MCEM Simulation Results")
 ```
 
-Bayesian method results:
+All the estimates of parameters (except $logh_0$) are very close to their true values, which validate the correctness of MCEM method.
+
+#### Bayesian method results
 
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 simulation.Bayesian = sim.Bayesian(sim.num = 10)
@@ -543,6 +545,8 @@ simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```{r}
 kable(simulation.Bayesian, caption = "Bayesian Simulation Results")
 ```
+
+All the estimates are very close to the true values of paramters and the root-mean-square errors are close to standard deviations, which validate the correctness of Bayesian method.
 
 # Discussion
 
