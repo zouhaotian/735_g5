@@ -135,7 +135,7 @@ Second, we calculate $\sigma_u^{(t+1)} = \text{SD}(\boldsymbol{u})$, where $\bol
 
 Third, for maximization of $(\beta_0, \beta_1, \boldsymbol{\beta}, \log(h_0))$, we used MH algorithm with RW to sample from the log likelihood given $\sigma_u^{(t+1)}$, $\sigma_e^{(t+1)}$, $\gamma^{(t)}$, $\alpha^{(t)}$.
 
-Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
+Finally, for maximization $\gamma, \alpha$, we fit a Cox proportional hazards model, using the augmented survival dataset, given $\log(h_0)^{(t+1)}$, $m_i(T_i)^{(t+1), m}$, where $m_i(T_i)^{(t+1), m} = \beta_0^{(t+1)} + \beta_1^{(t+1)}T_i + \boldsymbol{x_i'^{(T_i)}} \boldsymbol{\beta^{(t+1)}} + u_i^{m}$, and $u_i^{m}$ denotes the $m^{th}$ random effect for subject $i$.
 
 ### Bayesian methods
 
@@ -163,13 +163,13 @@ To get initial values of $\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma
 
 To get initial values of $\log(h_0), \gamma, \alpha$, we fit an AFT model with exponential distribution, where the latent longitudinal mean is calculated at the event time for each subject. We extract the estimated intercept and coefficients, and take negative as initial values of $\log(h_0), \gamma, \alpha$.
 
-### Random Survival Forest
+### RSF
 
 For machine learning methods, we used the random survival forest (RSF), considering only for the survival model, and ignoring the longitudinal model, where We used the CD4 count nearest to survival time as the substitute of latent longitudinal mean.
 
 For the random survival forest, we used our function `RandomSurvivalForest`. This function `rfsrc` from the r package `randomForestSRC`, allows random forest for right-censored survival.
 
-Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}$, $d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ $(Y_{k,l}$,$Y_{k,r})$.
+Here we used the log-rank test to grow survival trees. In our dataset, we split each tree at $x\le c$ and $x>c$ where x is CD4 cell count and drug didanosine (ddI). Since we only use 2 variables, each split depends on one variable. Such a split defines left($x\le c$) and right($x>c$) daughter membership. Each split maximizes survival differences between the two nodes. Let $t_1<t_2<\dots<t_m$ be the distinct times of `death` in the parent node $h$, and for each left and right node, we get the number of deaths ($d_{k,l}, d_{k,r}$ where l=left, r=right) and patients at risk respectively at time $t_k$ $(Y_{k,l}, Y_{k,r})$.
 
 $$
 Y_{k,l} = \#\{i:T_i \ge t_k, x_i \le c\},\quad Y_{k,r} = \#\{i:T_i \ge t_k, x_i > c\}
@@ -186,7 +186,7 @@ We find the c such that maximizes $|L(x,c)|$, which means the differences betwee
 
 In order to check our methods work, we simulated data to test our package. Our simulation set-up is as follows:
 
-First, we simulated the longitudinal responses using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18$. 
+First, we simulated the longitudinal responses based on the estimated values from the original `aids` data using the following formula: $Y_{ij} = 20 + (-1)*t_{ij} + (-4)*x_i + u_i + \epsilon_{ij}$, where $u_i \sim N(0, 4), \epsilon_{ij} \sim N(0, 1), x_i \sim \text{binom}(1, 0.4)$, for subject $i$ at time point $j$ where $i = 1,\dots,N$ and $j = 0,2,6,12,18$. 
 
 Next, we simulated N random uniform distributions to correspond with the survival probabilities $S(T)$. We used the relation between $S(T_i)$ and the hazard to calculate the survival time. The hazard is defined as: $h_i(T_i) = \exp(-2) \exp(-1*w_i + (-0.2)*m_i(T_i))$, where $w_i$ corresponds to the drug variable in the `aids` dataset and $w_i \sim \text{binom}(1, 0.5), m_i(T_i) = 20 + (-1)*T_i + (-4)*x_i + u_i$. We calculated the survival time $T_i^*$ using following formula:
 
@@ -235,6 +235,19 @@ sim.MCEM = function(sim.num = 10, max.iter = 30, tol = 1e-3, seed = 123, progres
 sim.Bayesian = function(sim.num = 10, n.iter = 2000, n.burnin = floor(n.iter/2), seed = 123, progress = TRUE){}
 ```
 
++ `jm_filter`: Function that generates the longitudinal and survival data we need to run our three methods. 
+
++ `MCEM`, `fit_stan`, `RandomSurvivalForest`: Main functions that applies to our three methods MCEM, Bayesian, and random survival forest, respectively.
+
++ `create_cv`: Function that generates cross-validation data from our original data. Used when generating AUC and Brier Score.
+
++ `cal_AUC_BS`, `calc_AUC_BS_RSF`: Functions that generate AUC and BS calculation for MCEM, Bayesian and RSF.
+
++ `SimulateDataset`: Function that generates simulation data
+
++ `sim.MCEM`, `sim.Bayesian`: Functions that generate simulated datasets to check if functions for each method runs correctly.
+
+
 # Results 
 
 We first load our R package, `jm5`. We want to separate the `aids` dataset into its corresponding longitudinal and survival components. 
@@ -242,10 +255,10 @@ We first load our R package, `jm5`. We want to separate the `aids` dataset into 
 ### Load our `jm5` package; separate `aids` dataset
 
 ```{r message=FALSE}
+load_all('jm5')
 library(tidyverse)
 library(knitr)
 library(devtools)
-load_all('jm5')
 ```
 
 In accordance with our first two objectives, we define our longitudinal formula and survival formula, and create two separate longitudinal and survival datasets.
@@ -368,33 +381,29 @@ time_mcem1 = end - start
 
 We now fit the MCEM algorithm for the `aids` dataset. This method took `r round(time_mcem1,2)` minutes to run. Our parameter estimates of $\boldsymbol{\theta} = (\beta_0, \beta_1, \boldsymbol{\beta}, \sigma_u, \sigma_e, \boldsymbol{\gamma}, \alpha)'$ are summarized in the table below.
 
-```{r echo=FALSE}
-res.mcem = as.data.frame(t(as.matrix(mcem.result)))
-kable(res.mcem, caption = "Model Fitting Results from MCEM")
+```{r}
+kable(mcem.result, caption = "Model Fitting Results from MCEM")
 ```
-
-It is time-consuming to run MCEM and each iteration takes more than 1 minute. Although the algorithm is hard to converge and we only run 10 iterations, the estimates are still similar with the estimates given by Bayesian method below.
 
 ### Model fit for `aids` dataset - Bayesian method
 
-```{r warning=FALSE, results="hide"}
+```{r}
 start = Sys.time()
 fit.result <- fit_stan(l.formula2, s.formula2, long.dat, surv.dat)
+fit.result
 end = Sys.time()
 time_bayes1 = end - start
 ```
 
 Meanwhile, using the Bayesian method on the `aids` dataset, we obtained our parameter estimates in only `r round(time_bayes1,2)` minutes. This is `r time_mcem1 - time_bayes1` minutes faster than MCEM. Our parameter estimates of are summarized in the table below.
 
-```{r echo=FALSE}
-kable(fit.result[1:10,1:8], caption = "Model Fitting Results from Bayesian")
+```{r}
+kable(fit.result, caption = "Model Fitting Results from Bayesian")
 ```
 
-It is easy to implement Bayesian method in Stan. Since we got the posterior distributions of the parameters, we can easily obtain the estimates and corresponding 95% credible intervals, which gave similar results with MCEM method.
+### RSF for `aids` dataset
 
-### Random Survival Forest for `aids` dataset
-
-For Random Survival Forest (RSF), since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data and run the algorithm to obtain the predicted survival probability of each subject.
+For RSF, since we used the CD4 count nearest to death as a covariate, we add also adjust for this in our survival data.
 
 ```{r}
 nearestCD4 = long.dat %>%
@@ -409,8 +418,8 @@ s.formula.rsf <- Surv(Time, death) ~ drugddI + CD4
 
 ```{r}
 fit = RandomSurvivalForest(surv.dat.rsf, s.formula.rsf)
+head(fit$survival[, 1:10]) ## In-bag survival function
 ```
-
 ```{r echo=FALSE}
 surv.dat.rsf$drugddI = as.factor(surv.dat.rsf$drugddI)
 ddI = colMeans(fit$survival[which(surv.dat.rsf$drugddI=="1"),])
@@ -422,8 +431,6 @@ ggplot(fit.rsf, aes(x = Time, y = Survival, colour = drug)) +
   theme_light() +
   labs(title = "Predicted survival functions for two drug groups")
 ```
-
-The average survival curves for the two drug groups shows that the survival probabilities of group ddI and ddC are very close to each other at early stages. However, the survival probability of group ddC will be overall higher that group ddI later, which implies that the effect of ddC is better than ddI.
 
 ### Cross-validation: AUC and BS for `aids` dataset (MCEM, Bayesian)
 
@@ -524,7 +531,7 @@ kable(RSF.auc.bs.mean, caption = "Means of AUC and BS from RSF")
 
 Using our simulation function from the R package, we can check the methods. We create 10 independent simulated datasets per method.
 
-#### MCEM method results
+MCEM method results:
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 ## Simulation for MCEM
 simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
@@ -534,9 +541,7 @@ simulation.MCEM = sim.MCEM(sim.num = 10, max.iter = 10, progress = TRUE)
 kable(simulation.MCEM, caption = "MCEM Simulation Results")
 ```
 
-All the estimates of parameters (except $logh_0$) are very close to their true values, which validate the correctness of MCEM method.
-
-#### Bayesian method results
+Bayesian method results:
 
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 simulation.Bayesian = sim.Bayesian(sim.num = 10)
@@ -545,8 +550,6 @@ simulation.Bayesian = sim.Bayesian(sim.num = 10)
 ```{r}
 kable(simulation.Bayesian, caption = "Bayesian Simulation Results")
 ```
-
-All the estimates are very close to the true values of paramters and the root-mean-square errors are close to standard deviations, which validate the correctness of Bayesian method.
 
 # Discussion
 
